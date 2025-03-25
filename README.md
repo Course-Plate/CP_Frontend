@@ -29,6 +29,7 @@ couseplate-frontend/
 │       ├── logo.png
 ```
 2025-03-25
+
 ✅ 구현된 주요 화면
 🔐 회원가입 화면
 이름, 전화번호, 비밀번호, 비밀번호 확인 입력
@@ -39,6 +40,7 @@ couseplate-frontend/
 
 입력 상태에 따라 완료 버튼이 회색으로 비활성화됨
 
+
 🔑 로그인 화면
 전화번호 + 비밀번호 입력
 
@@ -46,15 +48,18 @@ couseplate-frontend/
 
 회원가입 링크 제공 (/signup으로 이동)
 
+
 🧩 재사용 컴포넌트
 CustomInput.js: 스타일이 통일된 입력 필드 컴포넌트
 
 PrimaryButton.js: 버튼 기본 스타일 적용 및 disabled 상태 지원
 
+
 🎨 공통 스타일 관리
 모든 화면에서 사용하는 레이아웃, 입력, 버튼 스타일은 styles/common.js에 통합
 
 flex, row, title, verifyButton 등도 여기에 정의하여 유지보수 효율화
+
 
 ⚙️ 개발 중 기능 (To-Do)
  전화번호 인증 API 연동 (/send-verification)
@@ -69,6 +74,7 @@ flex, row, title, verifyButton 등도 여기에 정의하여 유지보수 효율
  
 ### 실행
 npx expo start
+
 ### 참고사항
 공통 스타일은 styles/common.js에서 수정
 
