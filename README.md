@@ -1,17 +1,31 @@
-🏗️ 프로젝트 구조
-📂 couseplate-frontend
-├── 📂 app               # expo-router 페이지 관리
-│   ├── 📄 index.js      # 기본 네비게이션 설정
-├── 📂 assets            # 정적 파일 (이미지, 아이콘 등)
-├── 📂 node_modules      # npm 패키지
-├── 📄 .gitignore
-├── 📄 app.json          # Expo 설정 파일
-├── 📄 package.json      # 프로젝트 메타데이터 및 의존성
-├── 📄 index.js          # 앱 엔트리 포인트
-└── 📄 README.md         # 프로젝트 설명 파일
+# Couseplate Frontend
 
-2️⃣ 프로젝트 클론 및 실행
-git clone https://github.com/your-repo/couseplate-frontend.git
-cd couseplate-frontend
-npm install
+## 기술 스택
+
+- **Expo SDK**: 52.0.40
+- **React Native**: 0.76.7
+- **React**: 18.3.1
+- **Expo Router**: 4.0.19
+
+## 프로젝트 디렉토리 구조
+
+```plaintext
+couseplate-frontend/
+│
+├── app/                  # 주요 애플리케이션 코드
+├── assets/               # 이미지, 아이콘 등 정적 자산
+├── node_modules/         # 프로젝트 종속성 모듈
+│
+├── .gitignore            # Git 제외 항목 정의
+├── App.js                # 프로젝트 진입점
+├── app.json              # Expo 설정 파일
+├── package.json          # 프로젝트 종속성 관리
+└── package-lock.json     # 종속성 버전 관리
+```
+
+
+### 실행
 npx expo start
+
+## 개발 참고 사항
+
