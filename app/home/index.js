@@ -49,7 +49,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                         style={[
                             common.verifyButton,
-                            selectedButton === 'food' && common.clicked,
+                            selectedButton === 'food' && common.non_clicked,
                             { borderRadius: 30, paddingHorizontal: 30 }
                         ]}
                         onPress={() => setSelectedButton('travel')} // 버튼 클릭 시 상태 변경
@@ -71,7 +71,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                         style={[
                             common.verifyButton,
-                            selectedButton === 'travel' && common.clicked,
+                            selectedButton === 'travel' && common.non_clicked,
                             { borderRadius: 30, paddingHorizontal: 30 }
                         ]}
                         onPress={() => setSelectedButton('food')} // 버튼 클릭 시 상태 변경

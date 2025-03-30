@@ -146,7 +146,7 @@ export default StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
-    clicked: {
+    non_clicked: {
         backgroundColor: 'white',
         borderWidth: 1,
         borderColor: '#C3C3C3',
