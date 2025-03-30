@@ -22,7 +22,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={common.container}>
+        <View style={common.startContainer}>
             <Image
                 source={require('../../assets/logo/Logo.png')}
                 style={common.logo}

@@ -59,7 +59,7 @@ export default function SignupScreen() {
         isVerified;
 
     return (
-        <View style={common.container}>
+        <View style={common.startContainer}>
             {/* 로고 이미지 */}
             <Image
                 source={require('../../assets/logo/logo_clean.png')}

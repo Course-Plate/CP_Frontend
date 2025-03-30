@@ -3,10 +3,16 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
-    container: {
+    startContainer: {
         flex: 1,
         backgroundColor: '#fff',
         paddingHorizontal: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    MainContainer: {
+        flex: 1,
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -15,6 +21,70 @@ export default StyleSheet.create({
         height: 350,
         resizeMode: 'contain',
         marginBottom: 40,
+    },
+    headerImage: {
+        width: '100%',
+        flex: 0.3,
+        justifyContent: 'flex-end',
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject, // 이미지 위에 전체 덮기
+        backgroundColor: 'rgba(0, 0, 0, 0.2)', // 검정색 반투명
+    },
+    headerText1: {
+        fontSize: 40,
+        fontFamily: 'Candal',
+        color: '#fff',
+        marginLeft: 10,
+    },
+    headerText2: {
+        fontSize: 16,
+        fontFamily: 'Candal',
+        color: '#fff',
+        marginLeft: 10,
+        marginBottom: 10,
+    },
+    section: {
+        width: '100%',
+        borderBottomWidth: 1,
+        borderBottomColor: '#C3C3C3',
+        flex: 0.5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 30,
+        paddingVertical: 20,
+    },
+    section_top: {
+        flex: 0.1,
+        width: '100%',
+        paddingBottom: 25,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#C3C3C3',
+    },
+    section_bottom: {
+        flex: 0.8,
+        width: '100%',
+        paddingTop: 25,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#C3C3C3',
+    },
+    footer: {
+        flex: 0.2,
+        flexDirection: 'row',
+        width: '100%',
+        height: 50,
+        justifyContent: 'space-around',
+        alignItems: 'center',
+    },
+    footerButton: {
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     input: {
         width: '100%',
@@ -76,4 +146,9 @@ export default StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+    clicked: {
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#C3C3C3',
+    }
 });
