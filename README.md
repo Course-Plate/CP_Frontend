@@ -1,4 +1,4 @@
-# Couseplate Frontend
+# Courseplate Frontend
 
 ## 기술 스택
 
@@ -9,7 +9,7 @@
 
 ## 프로젝트 디렉토리 구조
 ```
-couseplate-frontend/
+courseplate-frontend/
 ├── app/
 │   ├── login/              ← 로그인 페이지
 │   │   └── index.js
@@ -20,6 +20,8 @@ couseplate-frontend/
 ├── components/             ← 재사용 가능한 UI 컴포넌트
 │   ├── CustomInput.js
 │   └── PrimaryButton.js
+│
+├── context/                ← 전역 상태 관리
 │
 ├── styles/                 ← 공통 스타일
 │   └── common.js

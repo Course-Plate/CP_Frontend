@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "couseplate-frontend",
-    "slug": "couseplate-frontend",
+    "name": "courseplate-frontend",
+    "slug": "courseplate-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

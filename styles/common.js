@@ -1,6 +1,8 @@
 // styles/common.js
 
-import { StyleSheet } from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
+
+const { width, height } = Dimensions.get('window');     // 화면 크기 가져오기
 
 export default StyleSheet.create({
     startContainer: {
@@ -15,6 +17,18 @@ export default StyleSheet.create({
         backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modal: {
+        position: 'absolute',
+        top: height * 0.35,
+        left: width * 0.1,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#FFF8E1',
+        width: width * 0.8,
+        height: height * 0.4,
+        borderRadius: 20,
+        elevation: 2
     },
     logo: {
         width: 350,
