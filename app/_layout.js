@@ -1,7 +1,7 @@
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { PreferencesProvider } from "../context/PreferencesContext";
-import {StatusBar} from "expo-status-bar";
+import { AppProviders } from "../context/AppContext";
+import { StatusBar } from "expo-status-bar";
 
 export default function Layout() {
     const pathname = usePathname();
@@ -10,7 +10,7 @@ export default function Layout() {
     const hideHeaderLogo = pathname === '/login' || pathname === '/signup';
 
     return (
-        <PreferencesProvider>
+        <AppProviders>
             <StatusBar style="light" backgroundColor="black" />
             <Stack
                 screenOptions={{
@@ -29,7 +29,7 @@ export default function Layout() {
                     },
                 }}
             />
-        </PreferencesProvider>
+        </AppProviders>
     );
 }
 

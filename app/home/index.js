@@ -1,14 +1,13 @@
 // app/home/index.js
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { View, Text, ImageBackground, TouchableOpacity, Modal } from 'react-native';
 import common from "../../styles/common";
 import PrimaryButton from '../../components/PrimaryButton';
+import { useFont } from "../../context/FontContext";  // FontContext 가져오기
 import { usePreferences } from "../../context/PreferencesContext";
 import { Search, History, User } from 'lucide-react-native';
-import { useFonts, Candal_400Regular } from '@expo-google-fonts/candal';
-import * as SplashScreen from 'expo-splash-screen';
-
 
 // 알림창 알림문구 설정 함수
 const setModalMessage = (isLocationSet, isTasteSurveyCompleted) => {
@@ -25,12 +24,12 @@ const setModalMessage = (isLocationSet, isTasteSurveyCompleted) => {
 
 
 export default function HomeScreen() {
-
+    const router = useRouter();
+    const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
     const [selectedButton, setSelectedButton] = useState('travel');   // 현재 선택된 버튼 상태
     const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
     const { isLocationSet, isTasteSurveyCompleted } = usePreferences();
     const [ModalMessage, setModalMessageState] = useState(setModalMessage(isLocationSet, isTasteSurveyCompleted));   // 알림창 알림문구
-
 
     // isLocationSet과 isTasteSurveyCompleted가 변경될 때마다 ModalMessage를 업데이트
     useEffect(() => {
@@ -38,18 +37,9 @@ export default function HomeScreen() {
     }, [isLocationSet, isTasteSurveyCompleted]);
 
 
-
-    SplashScreen.preventAutoHideAsync(); // 폰트 로드 중 스플래시 화면 유지
-
-    const [fontsLoaded] = useFonts({
-        Candal: Candal_400Regular,    // Candal 폰트 로드
-    });
-
     if (!fontsLoaded) {
-        return null;      // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
+        return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
     }
-    SplashScreen.hideAsync();      // 폰트 로드 완료 후 스플래시 화면 숨기기
-
 
 
     return (
@@ -185,7 +175,10 @@ export default function HomeScreen() {
 
 
                 {/* Profile 버튼 */}
-                <TouchableOpacity style={common.footerButton}>
+                <TouchableOpacity
+                    style={common.footerButton}
+                    onPress={() => router.push('/profile')}
+                >
                     <User size={40} color='black'></User>
                     <Text style={[common.headerText2, {color: 'black', textAlign: 'center', marginLeft: 0}]}>Profile</Text>
                 </TouchableOpacity>

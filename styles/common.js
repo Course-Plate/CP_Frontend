@@ -100,6 +100,17 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    view: {
+        height: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        marginBottom: 30,
+        backgroundColor: '#fff',
+    },
     input: {
         width: '100%',
         height: 50,
