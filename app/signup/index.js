@@ -1,55 +1,40 @@
 import React, { useState } from 'react';
-import common from '../../styles/common';
-
 import {
+    KeyboardAvoidingView,
+    ScrollView,
+    Platform,
     View,
     Text,
-    Alert,
-    Image,
     TouchableOpacity,
+    Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import CustomInput from '../../components/CustomInput';
 import PrimaryButton from '../../components/PrimaryButton';
+import { common, auth, lightColors, darkColors } from '../../styles';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SignupScreen() {
     const router = useRouter();
+    const { isDarkMode } = useTheme();
+    const colors = isDarkMode ? darkColors : lightColors;
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [code, setCode] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [isVerified, setIsVerified] = useState(false); // ✅ 인증 완료 여부
+    const [isVerified, setIsVerified] = useState(false);
+    const [showCodeInput, setShowCodeInput] = useState(false);
 
-    const handleRequestVerification = () => {
-        if (!phone) {
-            Alert.alert('오류', '전화번호를 입력해주세요.');
-            return;
-        }
+    const confirmBorderColor = !confirmPassword
+        ? colors.border
+        : password === confirmPassword
+            ? 'green'
+            : 'red';
 
-        // TODO: 인증번호 요청 API
-        console.log('📤 인증번호 요청:', phone);
-        Alert.alert('인증번호 전송됨');
-        setIsVerified(true); // ✅ 실제 요청 성공 시 처리
-    };
-
-    const handleSignup = () => {
-        if (!name || !phone || !password || !confirmPassword) {
-            Alert.alert('입력 오류', '모든 항목을 입력해주세요.');
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            Alert.alert('비밀번호 불일치', '비밀번호가 일치하지 않습니다.');
-            return;
-        }
-
-        console.log('👤 회원가입 요청:', { name, phone, password });
-        Alert.alert('회원가입 완료', `${name}님, 환영합니다!`);
-        router.push('/login');
-    };
-
-    // ✅ 모든 필수 값이 입력됐고, 인증까지 완료되었는지 확인
     const isFormValid =
         name.trim() &&
         phone.trim() &&
@@ -58,58 +43,136 @@ export default function SignupScreen() {
         password === confirmPassword &&
         isVerified;
 
+    const handleRequestVerification = () => {
+        if (!phone) {
+            Alert.alert('오류', '전화번호를 입력해주세요.');
+            return;
+        }
+
+        Alert.alert('인증번호 전송됨');
+        console.log('📤 인증번호 요청:', phone);
+        setShowCodeInput(true);
+    };
+
+    const handleSignup = async () => {
+        if (!isFormValid) {
+            Alert.alert('입력 오류', '모든 항목을 올바르게 입력해주세요.');
+            return;
+        }
+
+        Alert.alert('회원가입 완료', `${name}님, 환영합니다!`);
+        console.log('👤 회원가입 요청:', { name, phone, password });
+
+        await AsyncStorage.setItem('userName', name);
+        router.push('/login');
+    };
+
     return (
-        <View style={common.container}>
-            {/* 로고 이미지 */}
-            <Image
-                source={require('../../assets/logo/logo_clean.png')}
-                style={common.logo}
-            />
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={80}
+        >
+            <ScrollView
+                contentContainerStyle={[
+                    common.container,
+                    { backgroundColor: colors.background },
+                ]}
+                keyboardShouldPersistTaps="handled"
+            >
+                <Text style={[common.title, { color: colors.text }]}>회원가입</Text>
 
-            <Text style={common.title}>회원가입</Text>
-
-            <CustomInput
-                placeholder="이름"
-                value={name}
-                onChangeText={setName}
-            />
-
-            {/* 전화번호 + 인증요청 */}
-            <View style={common.row}>
-                <CustomInput
-                    placeholder="전화번호 (- 없이)"
-                    value={phone}
-                    onChangeText={setPhone}
-                    keyboardType="phone-pad"
-                    style={[common.flex, common.noMargin]}
-                />
-                <TouchableOpacity
-                    style={common.verifyButton}
-                    onPress={handleRequestVerification}
+                <View
+                    style={{
+                        backgroundColor: colors.card,
+                        padding: 24,
+                        borderRadius: 16,
+                        width: '100%',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 3,
+                        marginBottom: 32,
+                    }}
                 >
-                    <Text style={common.verifyText}>인증요청</Text>
-                </TouchableOpacity>
-            </View>
+                    <CustomInput
+                        placeholder="이름"
+                        value={name}
+                        onChangeText={setName}
+                        backgroundColor={colors.inputBg}
+                        color={colors.text}
+                        borderColor={colors.border}
+                        placeholderTextColor={colors.placeholder}
+                    />
 
-            <CustomInput
-                placeholder="비밀번호"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-            <CustomInput
-                placeholder="비밀번호 확인"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-            />
+                    <View style={auth.row}>
+                        <CustomInput
+                            placeholder="전화번호 (- 없이)"
+                            value={phone}
+                            onChangeText={setPhone}
+                            keyboardType="phone-pad"
+                            backgroundColor={colors.inputBg}
+                            color={colors.text}
+                            borderColor={colors.border}
+                            placeholderTextColor={colors.placeholder}
+                            style={[common.flex, common.noMargin]}
+                        />
+                        <TouchableOpacity
+                            style={[auth.verifyButton, { backgroundColor: colors.accent }]}
+                            onPress={handleRequestVerification}
+                        >
+                            <Text style={auth.verifyText}>
+                                {showCodeInput ? '재전송' : '인증요청'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
-            {/* ✅ 완료 버튼 - 비활성화 상태 적용 */}
-            <PrimaryButton
-                title="완료"
-                onPress={handleSignup}
-                disabled={!isFormValid}
-            />
-        </View>
+                    {showCodeInput && (
+                        <CustomInput
+                            placeholder="인증번호 입력"
+                            value={code}
+                            onChangeText={(text) => {
+                                setCode(text);
+                                if (text.length >= 4) setIsVerified(true);
+                            }}
+                            keyboardType="number-pad"
+                            backgroundColor={colors.inputBg}
+                            color={colors.text}
+                            borderColor={colors.border}
+                            placeholderTextColor={colors.placeholder}
+                        />
+                    )}
+
+                    <CustomInput
+                        placeholder="비밀번호"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        backgroundColor={colors.inputBg}
+                        color={colors.text}
+                        borderColor={colors.border}
+                        placeholderTextColor={colors.placeholder}
+                    />
+
+                    <CustomInput
+                        placeholder="비밀번호 확인"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry
+                        backgroundColor={colors.inputBg}
+                        color={colors.text}
+                        borderColor={confirmBorderColor}
+                        placeholderTextColor={colors.placeholder}
+                    />
+
+                    <PrimaryButton
+                        title="완료"
+                        onPress={handleSignup}
+                        disabled={!isFormValid}
+                    />
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }

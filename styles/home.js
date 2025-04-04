@@ -1,0 +1,71 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+    header: { height: 220, position: 'relative' },
+    backgroundImage: { width: '100%', height: '100%' },
+
+    topRow: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        right: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    leftProfile: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    nameText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#fff',
+    },
+
+    tabRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 20,
+        marginBottom: 16,
+        gap: 8,
+    },
+    tabButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    tabActive: {
+        backgroundColor: '#F57C00',
+    },
+    tabTextActive: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    cardText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 12,
+    },
+
+    bottomRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 40,
+        paddingVertical: 24,
+    },
+    bottomButton: {
+        width: '40%',
+        height: 80,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+    },
+    bottomIcon: {
+        width: 48,
+        height: 48,
+        resizeMode: 'contain',
+    },
+});

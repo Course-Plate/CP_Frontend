@@ -1,0 +1,147 @@
+import React, { useState, useCallback } from 'react';
+import {
+    View,
+    Text,
+    ScrollView,
+    TouchableOpacity,
+} from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../../contexts/ThemeContext';
+import { common, preference, lightColors, darkColors } from '../../styles';
+
+export default function PreferenceScreen() {
+    const router = useRouter();
+    const { isDarkMode } = useTheme();
+    const colors = isDarkMode ? darkColors : lightColors;
+
+    const [selectedType, setSelectedType] = useState('');
+    const [selectedAllergy, setSelectedAllergy] = useState([]);
+    const [spicy, setSpicy] = useState('');
+    const [temperature, setTemperature] = useState('');
+    const [budget, setBudget] = useState('');
+
+    const budgetOptions = ['10만원', '20만원', '30만원', '40만원'];
+
+    useFocusEffect(
+        useCallback(() => {
+            const loadAllergy = async () => {
+                const stored = await AsyncStorage.getItem('allergy');
+                if (stored) setSelectedAllergy(JSON.parse(stored));
+            };
+            loadAllergy();
+        }, [])
+    );
+
+    const savePreferences = async () => {
+        const preferences = {
+            type: selectedType,
+            allergy: selectedAllergy,
+            spicy,
+            temperature,
+            budget,
+        };
+        await AsyncStorage.setItem('preferences', JSON.stringify(preferences));
+        router.push('/home');
+    };
+
+    const renderButton = (label, selected, onPress, key) => (
+        <TouchableOpacity
+            key={key}
+            onPress={onPress}
+            style={[
+                preference.optionBtn,
+                selected && preference.optionBtnSelected,
+            ]}
+        >
+            <Text
+                style={[
+                    preference.optionText,
+                    selected && preference.optionTextSelected,
+                ]}
+            >
+                {label}
+            </Text>
+        </TouchableOpacity>
+    );
+
+    return (
+        <ScrollView
+            contentContainerStyle={[
+                common.container,
+                preference.container,
+                { backgroundColor: colors.background },
+            ]}
+        >
+            <Text style={[common.title, { color: colors.text }]}>취향 조사</Text>
+
+            <View style={[preference.card, { backgroundColor: colors.card }]}>
+                {/* 선호 유형 */}
+                <Text style={[preference.label, { color: colors.text }]}>선호 유형</Text>
+                <View style={preference.optionRow}>
+                    {['한식', '일식', '중식', '양식'].map((type) =>
+                        renderButton(type, selectedType === type, () => setSelectedType(type), type)
+                    )}
+                </View>
+
+                {/* 알러지 라우팅 */}
+                <Text style={[preference.label, { color: colors.text }]}>알레르기 성분</Text>
+                <TouchableOpacity
+                    onPress={() => router.push('/preference/allergy')}
+                    style={[
+                        preference.optionBtn,
+                        preference.allergyButton,
+                        selectedAllergy.length > 0 && preference.optionBtnSelected,
+                    ]}
+                >
+                    <Text
+                        style={[
+                            preference.optionText,
+                            selectedAllergy.length > 0 && preference.optionTextSelected,
+                        ]}
+                    >
+                        {selectedAllergy.length > 0 ? '재선택' : '선택'}
+                    </Text>
+                </TouchableOpacity>
+
+                {selectedAllergy.length > 0 && (
+                    <View style={preference.allergyBox}>
+                        {selectedAllergy.map((item) => (
+                            <View key={item} style={preference.allergyTag}>
+                                <Text style={{ color: '#fff' }}>{item}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* 매운맛 */}
+                <Text style={[preference.label, { color: colors.text }]}>매운 맛</Text>
+                <View style={preference.optionRow}>
+                    {['선호', '비선호'].map((opt) =>
+                        renderButton(opt, spicy === opt, () => setSpicy(opt), opt)
+                    )}
+                </View>
+
+                {/* 온도 선호 */}
+                <Text style={[preference.label, { color: colors.text }]}>온도 선호</Text>
+                <View style={preference.optionRow}>
+                    {['HOT', 'COLD'].map((opt) =>
+                        renderButton(opt, temperature === opt, () => setTemperature(opt), opt)
+                    )}
+                </View>
+
+                {/* 예산 */}
+                <Text style={[preference.label, { color: colors.text }]}>예산</Text>
+                <View style={preference.optionRow}>
+                    {budgetOptions.map((opt) =>
+                        renderButton(opt, budget === opt, () => setBudget(opt), opt)
+                    )}
+                </View>
+
+                <TouchableOpacity style={preference.submitBtn} onPress={savePreferences}>
+                    <Text style={preference.submitText}>설문 완료</Text>
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
+    );
+}
