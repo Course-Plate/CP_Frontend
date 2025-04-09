@@ -1,5 +1,7 @@
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { AppProviders } from "../context/AppContext";
+import { StatusBar } from "expo-status-bar";
 import { ThemeProvider, useTheme } from '../contexts/ThemeContext'; // ✅ useTheme 추가
 
 function LayoutInner() {
@@ -11,28 +13,31 @@ function LayoutInner() {
     const headerBgColor = isDarkMode ? '#1e1e1e' : '#fff';
 
     return (
-        <Stack
-            screenOptions={{
-                headerShown: false,
-                headerTitle: () =>
-                    hideHeaderLogo ? null : (
-                        <TouchableOpacity onPress={() => router.push('/home')}>
-                            <Text style={styles.logo}>
-                                <Text style={styles.course}>Course</Text>
-                                <Text style={styles.plate}>Plate</Text>
-                            </Text>
-                        </TouchableOpacity>
-                    ),
-                headerTitleAlign: 'left',
-                headerStyle: {
-                    backgroundColor: headerBgColor, // ✅ 다크모드 반영
-                },
-                contentStyle: {
-                    backgroundColor: headerBgColor, // ✅ 전환 중 배경색 적용
-                },
-                animation: 'fade', // ✨ 자연스러운 전환
-            }}
-        />
+        <AppProviders>
+            <StatusBar style="light" backgroundColor="black" />
+            <Stack
+                screenOptions={{
+                    headerShown: false,
+                    headerTitle: () =>
+                        hideHeaderLogo ? null : (
+                            <TouchableOpacity onPress={() => router.push('/home')}>
+                                <Text style={styles.logo}>
+                                    <Text style={styles.course}>Course</Text>
+                                    <Text style={styles.plate}>Plate</Text>
+                                </Text>
+                            </TouchableOpacity>
+                        ),
+                    headerTitleAlign: 'left',
+                    headerStyle: {
+                        backgroundColor: headerBgColor, // ✅ 다크모드 반영
+                    },
+                    contentStyle: {
+                        backgroundColor: headerBgColor, // ✅ 전환 중 배경색 적용
+                    },
+                    animation: 'fade', // ✨ 자연스러운 전환
+                }}
+            />
+        </AppProviders>
     );
 }
 

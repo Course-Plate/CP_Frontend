@@ -23,7 +23,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={[common.container, { backgroundColor: colors.background }]}>
+        <View style={[common.startContainer, { backgroundColor: colors.background }]}>
             <View style={[auth.logoCard, { backgroundColor: colors.card }]}>
                 <Image
                     source={require('../../assets/logo/logo_clean.png')}

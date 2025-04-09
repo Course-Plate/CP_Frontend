@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    Image,
-    TouchableOpacity,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
 import { Stack, useRouter } from 'expo-router';
+import { View, Text, ImageBackground, TouchableOpacity, Modal } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import SlideDrawer from '../../components/SlideDrawer';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
@@ -16,9 +11,41 @@ import {
     darkColors,
 } from '../../styles';
 import drawer from '../../styles/drawer';
+import PrimaryButton from '../../components/PrimaryButton';
+import { useFont } from "../../context/FontContext";  // FontContext 가져오기
+import { usePreferences } from "../../context/PreferencesContext";
+import { Search, History, User } from 'lucide-react-native';
+
+// 알림창 알림문구 설정 함수
+const setModalMessage = (isLocationSet, isTasteSurveyCompleted) => {
+    if (!isLocationSet && !isTasteSurveyCompleted) {
+        return "여행 지역 설정과 음식 취향 설문을 완료하세요";
+    } else if (!isLocationSet) {
+        return "여행 지역을 설정하세요";
+    } else if (!isTasteSurveyCompleted) {
+        return "음식 취향 설문을 완료하세요";
+    } else {
+        return "모든 설정이 완료되었습니다!";
+    }
+}
 
 
 export default function HomeScreen() {
+    const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
+    const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
+    const { isLocationSet, isTasteSurveyCompleted } = usePreferences();
+    const [ModalMessage, setModalMessageState] = useState(setModalMessage(isLocationSet, isTasteSurveyCompleted));   // 알림창 알림문구
+
+    // isLocationSet과 isTasteSurveyCompleted가 변경될 때마다 ModalMessage를 업데이트
+    useEffect(() => {
+        setModalMessageState(setModalMessage(isLocationSet, isTasteSurveyCompleted));
+    }, [isLocationSet, isTasteSurveyCompleted]);
+
+
+    if (!fontsLoaded) {
+        return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
+    }
+  
     const [userName, setUserName] = useState('사용자');
     const [menuOpen, setMenuOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState('region');
@@ -137,6 +164,29 @@ export default function HomeScreen() {
                 </TouchableOpacity>
             </View>
 
+            {/* 알림창 */}
+            <Modal
+                animationType="fade" // 모달 애니메이션 설정
+                transparent={true}  // 모달의 배경을 투명하게 설정
+                visible={modalVisible}  // 모달의 visible 상태가 true일 때만 보이게
+                onRequestClose={() => setModalVisible(false)}  // 안드로이드에서 뒤로 가기 버튼 눌렀을 때 모달 닫기
+            >
+                <View style={common.modal}>
+
+                    <Text style={[
+                        common.verifyText,
+                        {fontSize: 20, lineHeight: 30, textAlign: 'center', color: 'black', padding: 25}
+                    ]}>{ModalMessage}</Text>
+
+                    <PrimaryButton
+                        title="확인"
+                        onPress={() => setModalVisible(false)}
+                        style={{width: 100}}
+                        disabled={false}
+                    />
+                </View>
+            </Modal>
+
             {/* 슬라이드 메뉴 */}
             <SlideDrawer
                 visible={menuOpen}
@@ -182,7 +232,6 @@ export default function HomeScreen() {
                     </Text>
                 </TouchableOpacity>
             </SlideDrawer>
-
         </View>
     );
 }
