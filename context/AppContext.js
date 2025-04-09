@@ -1,4 +1,4 @@
-// context/AppProviders.js
+// context/AppContext.js
 import React from 'react';
 import { FontProvider } from './FontContext';
 import { PreferencesProvider } from './PreferencesContext';

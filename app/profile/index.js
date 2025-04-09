@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
-import { View, Text, Image, TouchableOpacity, Modal } from 'react-native';
+// app/profile/index.js
+
+import { View, Text, Image } from 'react-native';
 import common from "../../styles/common";
-import PrimaryButton from '../../components/PrimaryButton';
-import CustomInput from "../../components/CustomInput";
 import { useFont } from "../../context/FontContext";
 
 export default function Profile() {
@@ -30,8 +28,6 @@ export default function Profile() {
 
             {/* 비밀번호 */}
             <Text style={[common.headerText2, {color: 'black', fontSize: 25, marginLeft: 0, marginBottom: 5}]}>Password</Text>
-
-            {/* TODO: 비밀번호 해시화 */}
             <View style={common.view}><Text style={[common.buttonText, {color: 'black'}]}>abcdefghijklmnop</Text></View>
 
             {/* 리뷰 포인트 */}
