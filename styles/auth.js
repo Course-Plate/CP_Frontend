@@ -14,9 +14,7 @@ export default StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        alignItems: 'center',
         gap: 8,
-        marginBottom: 16,
     },
     verifyButton: {
         height: 50,

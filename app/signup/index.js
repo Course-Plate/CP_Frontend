@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomInput from '../../components/CustomInput';
 import PrimaryButton from '../../components/PrimaryButton';
 import { common, auth, lightColors, darkColors } from '../../styles';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function SignupScreen() {
     const router = useRouter();
@@ -116,7 +116,7 @@ export default function SignupScreen() {
                             color={colors.text}
                             borderColor={colors.border}
                             placeholderTextColor={colors.placeholder}
-                            style={[common.flex, common.noMargin]}
+                            style={{flex: 1}}
                         />
                         <TouchableOpacity
                             style={[auth.verifyButton, { backgroundColor: colors.accent }]}

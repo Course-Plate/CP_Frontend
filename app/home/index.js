@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Stack, useRouter } from 'expo-router';
-import { View, Text, ImageBackground, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, ImageBackground, Image, TouchableOpacity, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SlideDrawer from '../../components/SlideDrawer';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
     common,
     home,
@@ -14,7 +14,7 @@ import drawer from '../../styles/drawer';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useFont } from "../../context/FontContext";  // FontContext 가져오기
 import { usePreferences } from "../../context/PreferencesContext";
-import { Search, History, User } from 'lucide-react-native';
+
 
 // 알림창 알림문구 설정 함수
 const setModalMessage = (isLocationSet, isTasteSurveyCompleted) => {
@@ -25,35 +25,34 @@ const setModalMessage = (isLocationSet, isTasteSurveyCompleted) => {
     } else if (!isTasteSurveyCompleted) {
         return "음식 취향 설문을 완료하세요";
     } else {
-        return "모든 설정이 완료되었습니다!";
+        return "설정 완료";
     }
 }
 
-
 export default function HomeScreen() {
+
+    const router = useRouter();
     const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
-    const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
+    const { isDarkMode } = useTheme();
     const { isLocationSet, isTasteSurveyCompleted } = usePreferences();
+    const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
     const [ModalMessage, setModalMessageState] = useState(setModalMessage(isLocationSet, isTasteSurveyCompleted));   // 알림창 알림문구
+    const [userName, setUserName] = useState('사용자');
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [selectedTab, setSelectedTab] = useState('region');
+    const colors = isDarkMode ? darkColors : lightColors;
+
 
     // isLocationSet과 isTasteSurveyCompleted가 변경될 때마다 ModalMessage를 업데이트
     useEffect(() => {
         setModalMessageState(setModalMessage(isLocationSet, isTasteSurveyCompleted));
     }, [isLocationSet, isTasteSurveyCompleted]);
-
-
     if (!fontsLoaded) {
         return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
+
     }
-  
-    const [userName, setUserName] = useState('사용자');
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [selectedTab, setSelectedTab] = useState('region');
-    const router = useRouter();
-    const { isDarkMode } = useTheme();
 
-    const colors = isDarkMode ? darkColors : lightColors;
-
+    // 사용자 이름 불러오기
     useEffect(() => {
         const loadUser = async () => {
             const name = await AsyncStorage.getItem('userName');
@@ -62,11 +61,14 @@ export default function HomeScreen() {
         loadUser();
     }, []);
 
+
+    // 로그아웃
     const handleLogout = async () => {
         await AsyncStorage.clear();
         setMenuOpen(false);
         router.replace('/login');
     };
+
 
     return (
         <View style={[{ flex: 1, backgroundColor: colors.background }]}>
@@ -74,10 +76,11 @@ export default function HomeScreen() {
 
             {/* 상단 배경 */}
             <View style={home.header}>
-                <Image
+                <ImageBackground
                     source={require('../../assets/main-bg.png')}
                     style={home.backgroundImage}
                 />
+
                 <View style={home.topRow}>
                     <View style={home.leftProfile}>
                         <TouchableOpacity onPress={() => router.push('/profile')}>
@@ -93,6 +96,9 @@ export default function HomeScreen() {
                         />
                     </TouchableOpacity>
                 </View>
+
+                <Text style={common.headerText1}>Course Plate</Text>
+                <Text style={common.headerText2}>Find your favorite food!</Text>
             </View>
 
             {/* 탭 버튼 */}
@@ -122,14 +128,14 @@ export default function HomeScreen() {
             </View>
 
             {/* 카드 */}
-            <View style={[common.cardBox, { backgroundColor: colors.card }]}>
+            <View style={common.section}>
                 <Text style={[home.cardText, { color: colors.text }]}>
                     {selectedTab === 'region'
                         ? '지역을 설정하지 않았습니다'
                         : '취향 설문을 하지 않았습니다'}
                 </Text>
                 <TouchableOpacity
-                    style={[common.button, { backgroundColor: colors.accent }]}
+                    style={[common.button, { backgroundColor: colors.accent, marginBottom: 0 }]}
                     onPress={() =>
                         selectedTab === 'preference' &&
                         router.push('/preference')
@@ -155,7 +161,13 @@ export default function HomeScreen() {
 
                 <TouchableOpacity
                     style={[home.bottomButton, { backgroundColor: colors.card }]}
-                    onPress={() => router.push('/search')}
+                    onPress={() => {
+                        if (ModalMessage === '설정 완료') {
+                            router.push('/search');
+                        } else {
+                            setModalVisible(true);
+                        }
+                    }}
                 >
                     <Image
                         source={require('../../assets/home/search.png')}
@@ -181,7 +193,7 @@ export default function HomeScreen() {
                     <PrimaryButton
                         title="확인"
                         onPress={() => setModalVisible(false)}
-                        style={{width: 100}}
+                        style={{width: 100, backgroundColor: '#F57C00'}}
                         disabled={false}
                     />
                 </View>

@@ -6,7 +6,7 @@ import {
     Switch,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { common, setting, lightColors, darkColors } from '../../styles';
 
 export default function SettingScreen() {

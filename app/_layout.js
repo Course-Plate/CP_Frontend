@@ -2,7 +2,7 @@ import { Stack, usePathname, useRouter } from 'expo-router';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { AppProviders } from "../context/AppContext";
 import { StatusBar } from "expo-status-bar";
-import { ThemeProvider, useTheme } from '../contexts/ThemeContext'; // ✅ useTheme 추가
+import { ThemeProvider, useTheme } from '../context/ThemeContext'; // ✅ useTheme 추가
 
 function LayoutInner() {
     const pathname = usePathname();
@@ -17,7 +17,7 @@ function LayoutInner() {
             <StatusBar style="light" backgroundColor="black" />
             <Stack
                 screenOptions={{
-                    headerShown: false,
+                    headerShown: !hideHeaderLogo,
                     headerTitle: () =>
                         hideHeaderLogo ? null : (
                             <TouchableOpacity onPress={() => router.push('/home')}>

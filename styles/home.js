@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
-    header: { height: 220, position: 'relative' },
+    header: { flex: 0.5 },
     backgroundImage: { width: '100%', height: '100%' },
 
     topRow: {
@@ -29,7 +29,10 @@ export default StyleSheet.create({
         justifyContent: 'center',
         marginTop: 20,
         marginBottom: 16,
-        gap: 8,
+        gap: 30,
+        borderBottomWidth: 1,
+        borderBottomColor: '#C3C3C3',
+        paddingBottom: 25,
     },
     tabButton: {
         paddingHorizontal: 16,
