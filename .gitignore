@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+.idea
 
 # Expo
 .expo/
@@ -31,6 +32,21 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
+
+# Android
+/android/.gradle/
+/android/app/build/
+/android/local.properties
+/android/app/src/main/res/values/secrets.xml
+
+# Xcode
+*.xcworkspace
+!default.xcworkspace
+xcuserdata/
+
+# Gradle wrapper 로그
+gradle-app.setting

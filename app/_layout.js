@@ -11,10 +11,10 @@ function LayoutInner() {
 
     const hideHeaderLogo = pathname === '/login' || pathname === '/signup';
     const headerBgColor = isDarkMode ? '#1e1e1e' : '#fff';
+    const course = isDarkMode ? '#f0f0f0' : '#fff';
 
     return (
         <AppProviders>
-            <StatusBar style="light" backgroundColor="black" />
             <Stack
                 screenOptions={{
                     headerShown: !hideHeaderLogo,

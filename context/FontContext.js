@@ -3,20 +3,40 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useFonts, Candal_400Regular } from '@expo-google-fonts/candal';
 import * as SplashScreen from 'expo-splash-screen';
 
-// 스플래시 화면을 유지
-SplashScreen.preventAutoHideAsync();
-
-const FontContext = createContext();
+const FontContext = createContext({
+    fontsLoaded: false,
+});
 
 export function FontProvider({ children }) {
+
     const [fontsLoaded] = useFonts({
-        Candal: Candal_400Regular, // Candal 폰트 로드
+        Candal: Candal_400Regular,
     });
 
     useEffect(() => {
-        if (fontsLoaded) {
-            SplashScreen.hideAsync(); // 폰트 로드 완료 후 스플래시 화면 숨기기
-        }
+
+        const keepSplash = async () => {
+            try {
+                await SplashScreen.preventAutoHideAsync();
+            } catch (e) {
+                console.warn('[FontProvider] SplashScreen.preventAutoHideAsync 실패', e);
+            }
+        };
+        keepSplash();
+    }, []);
+
+    useEffect(() => {
+        const hideSplash = async () => {
+            if (fontsLoaded) {
+                console.log('[FontProvider] 폰트 로드 완료');
+                try {
+                    await SplashScreen.hideAsync();
+                } catch (err) {
+                    console.warn('[FontProvider] SplashScreen 숨김 실패', err);
+                }
+            }
+        };
+        hideSplash();
     }, [fontsLoaded]);
 
     return (
@@ -26,7 +46,6 @@ export function FontProvider({ children }) {
     );
 }
 
-// Context를 쉽게 사용하기 위한 Hook
 export function useFont() {
     return useContext(FontContext);
 }
