@@ -1,30 +1,44 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import React, { useState, useMemo, useRef, useEffect, useContext } from 'react';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    Modal,
+    ScrollView,
+    Dimensions,
+    TextInput,
+} from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { useTheme } from '../../../context/ThemeContext';
+import { useFont } from "../../../context/FontContext";
 import * as NaverMap from '@mj-studio/react-native-naver-map';
 import { common, lightColors, darkColors, home } from '../../../styles';
+import { PlacesContext } from '../../../context/PlacesContext';
+
+const { width, height } = Dimensions.get('window');
 
 export default function HistoryDetailScreen() {
     const { id } = useLocalSearchParams();
     const { isDarkMode } = useTheme();
-    const colors = isDarkMode ? darkColors : lightColors;
-
+    const { fontsLoaded } = useFont();
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [reservationVisible, setReservationVisible] = useState(false);
     const mapRef = useRef(null);
+    const { places } = useContext(PlacesContext);
+    const colors = isDarkMode ? darkColors : lightColors;
+    const [reviewVisible, setReviewVisible] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [reviewContent, setReviewContent] = useState('');
 
-    const mockPlaces = [
-        { id: 'a', name: '조선면옥', lat: 37.571, lng: 126.98, type: '아침', info: '한식 전문점' },
-        { id: 'b', name: '떡볶이공방', lat: 37.572, lng: 126.981, type: '점심', info: '분식 맛집' },
-        { id: 'c', name: '이탈리안라운지', lat: 37.573, lng: 126.982, type: '저녁', info: '이탈리안 레스토랑' },
-    ];
+    if (!fontsLoaded) {
+        return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
+    }
 
     // 중심 마커 계산
     const centerMarker = useMemo(() => {
         const centerPoint = {
-            lat: mockPlaces.reduce((sum, p) => sum + p.lat, 0) / mockPlaces.length,
-            lng: mockPlaces.reduce((sum, p) => sum + p.lng, 0) / mockPlaces.length,
+            lat: places.reduce((sum, p) => sum + p.lat, 0) / places.length,
+            lng: places.reduce((sum, p) => sum + p.lng, 0) / places.length,
         };
 
         const getDistance = (a, b) => {
@@ -33,7 +47,7 @@ export default function HistoryDetailScreen() {
             return Math.sqrt(dLat * dLat + dLng * dLng);
         };
 
-        return mockPlaces.reduce((closest, current) => {
+        return places.reduce((closest, current) => {
             const currentDist = getDistance(current, centerPoint);
             const closestDist = getDistance(closest, centerPoint);
             return currentDist < closestDist ? current : closest;
@@ -54,6 +68,15 @@ export default function HistoryDetailScreen() {
         return () => clearTimeout(id);
     }, [centerMarker]);
 
+    // 별점 그리기
+    const renderStars = () => {
+        return [1,2,3,4,5].map(i => (
+            <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                <Text style={{ fontSize: 60, color: i <= rating ? '#F57C00' : '#E0E0E0' }}>★</Text>
+            </TouchableOpacity>
+        ));
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             <Stack.Screen options={{ title: `코스 상세 ${id}` }} />
@@ -67,7 +90,7 @@ export default function HistoryDetailScreen() {
                     zoom: 15,
                 }}
             >
-                {mockPlaces.map((place) => (
+                {places.map((place) => (
                     <NaverMap.NaverMapMarkerOverlay
                         key={place.id}
                         latitude={place.lat}      // 반드시 latitude, longitude 사용 :contentReference[oaicite:1]{index=1}
@@ -80,7 +103,7 @@ export default function HistoryDetailScreen() {
 
             {/* 음식점 정보 카드 리스트 */}
             <ScrollView style={{ padding: 10, maxHeight: 220 }}>
-                {mockPlaces.map((place) => (
+                {places.map((place) => (
                     <View key={place.id} style={[common.cardBox, {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
@@ -103,21 +126,110 @@ export default function HistoryDetailScreen() {
             {/* 음식점 정보 모달 */}
             {selectedPlace && (
                 <Modal visible={true} transparent animationType="slide">
-                    <View style={[common.modal, { backgroundColor: '#fff' }]}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 20 }}>{selectedPlace.name}</Text>
-                        <Text>{selectedPlace.info}</Text>
-                        <TouchableOpacity onPress={() => setSelectedPlace(null)}>
-                            <Text style={{ color: 'blue', marginTop: 20 }}>닫기</Text>
-                        </TouchableOpacity>
+                    <View style={[common.modal, { justifyContent: 'flex-start', top: height * 0.1, height: height * 0.85 }]}>
+                        <Text style={{ fontSize: 30, marginTop: 10, fontFamily: 'Jua' }}>{selectedPlace.name}</Text>
+                        <Text style={{ marginTop: 5, marginBottom: 5 }}>{selectedPlace.roadAddress}</Text>
+                        <Text>{selectedPlace.telephone}</Text>
+                        <Text style={{
+                            width: '100%',
+                            minHeight: 80,
+                            textAlign: 'center',
+                            margin: 10,
+                            borderStyle: 'dotted',
+                            borderBottomWidth: 0.5
+                        }}>{selectedPlace.description}</Text>
+
+                        <ScrollView style={{
+                            width: '100%',
+                            padding: 10,
+                            maxHeight: 500,
+                        }}>
+
+                            {/* 리뷰 최신순 정렬 */}
+                            {[...selectedPlace.review].reverse().map(r => (
+                                <View key={r.id} style={{ marginBottom: 12 }}>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Text style={{ flex: 0.5, fontFamily: 'Jua', fontSize: 18 }}>{`메뉴: ${r.menu}`}</Text>
+                                        <Text style={{ flex: 0.5, fontFamily: 'Jua', fontSize: 18 }}>{`작성자: ${r.userId}`}</Text>
+                                    </View>
+                                    <Text style={{ fontSize: 12, marginTop: 2 }}>{r.date}</Text>
+                                    <Text style={{ marginTop: 4 }}>{r.content}</Text>
+                                </View>
+                            ))}
+
+                        </ScrollView>
+
+                        <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-around', position: 'absolute', bottom: 15 }}>
+                            <TouchableOpacity onPress={() => setReviewVisible(true)}>
+                                <Text style={{ fontSize: 27 }}>리뷰 쓰기</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => setSelectedPlace(null)}>
+                                <Text style={{ fontSize: 27 }}>닫기</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </Modal>
             )}
 
+            {/* 리뷰 작성 모달 */}
+            {reviewVisible && (
+                <Modal visible transparent animationType="slide">
+                    <View style={[common.modal, { justifyContent:'flex-start', top: height * 0.05, height: height * 0.9, padding:20 }]}>
+                        <View style={{ flexDirection:'row', justifyContent:'space-between' }}>
+                            <Text style={{ fontSize:20, fontWeight:'bold' }}>리뷰 작성</Text>
+                        </View>
+                        {/* 사진 영역 */}
+                        <View style={{ flexDirection:'row', alignItems:'center', marginVertical:15 }}>
+                            <View style={{ width:80, height:80, backgroundColor:'#e0e0e0', justifyContent:'center', alignItems:'center' }}>
+                                <Text>사진</Text>
+                            </View>
+                            <TouchableOpacity style={{ marginLeft:10 }}>
+                                <Text style={{ fontSize:16 }}>+ 사진 추가</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {/* 별점 */}
+                        <View style={{ flexDirection:'row', marginVertical:10 }}>
+                            {renderStars()}
+                        </View>
+                        {/* 상세 리뷰 입력 */}
+                        <Text style={{ marginVertical:10 }}>상세 리뷰를 작성해주세요</Text>
+                        <TextInput
+                            style={{ width: '100%', height: 200, borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:10, textAlignVertical:'top' }}
+                            multiline
+                            value={reviewContent}
+                            onChangeText={setReviewContent}
+                            placeholder="리뷰 입력"
+                        />
+
+                        <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-around', position: 'absolute', bottom: 15 }}>
+                            {/* 작성 버튼 */}
+                            <TouchableOpacity
+                                style={{ padding: 20, marginTop:20, backgroundColor:'#F57C00', paddingVertical:12, borderRadius:8, alignItems:'center' }}
+                                onPress={() => {
+                                    // TODO: 리뷰 저장 로직
+                                    setReviewVisible(false);
+                                }}
+                            >
+                                <Text style={{ color:'#fff', fontSize:16 }}>작성</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={{ padding: 20, marginTop:20, backgroundColor:'#F57C00', paddingVertical:12, borderRadius:8, alignItems:'center' }}
+                                onPress={() => setReviewVisible(false)}>
+                                <Text style={{ color:'#fff', fontSize:16 }}>닫기</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+
+
             {/* 예약 모달 */}
             {reservationVisible && (
-                <Modal visible={true} transparent animationType="fade">
-                    <View style={[common.modal, { backgroundColor: '#fff' }]}>
-                        <Text style={{ fontSize: 18 }}>예약</Text>
+                <Modal visible={true} transparent animationType="slide">
+                    <View style={common.modal}>
+                        <Text style={{ fontSize: 30, marginTop: 10, fontFamily: 'Jua' }}>예약</Text>
                         <Text>날짜: 2025-01-01</Text>
                         <Text>시간: 09:00</Text>
                         <Text>인원: 2명</Text>

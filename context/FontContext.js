@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useFonts, Candal_400Regular } from '@expo-google-fonts/candal';
 import * as SplashScreen from 'expo-splash-screen';
+import {Jua_400Regular} from "@expo-google-fonts/jua";
 
 const FontContext = createContext({
     fontsLoaded: false,
@@ -11,6 +12,7 @@ export function FontProvider({ children }) {
 
     const [fontsLoaded] = useFonts({
         Candal: Candal_400Regular,
+        Jua: Jua_400Regular,
     });
 
     useEffect(() => {
