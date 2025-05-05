@@ -95,7 +95,7 @@ export default function HistoryDetailScreen() {
                         key={place.id}
                         latitude={place.lat}      // 반드시 latitude, longitude 사용 :contentReference[oaicite:1]{index=1}
                         longitude={place.lng}
-                        image={{ symbol: place.id === centerMarker.id ? 'red' : 'green' }}
+                        image={{ symbol: 'green' }}
                         onTap={() => setSelectedPlace(place)}  // 이벤트명도 onTap 으로 :contentReference[oaicite:2]{index=2}
                     />
                 ))}
