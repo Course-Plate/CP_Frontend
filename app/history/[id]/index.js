@@ -7,7 +7,11 @@ import {
     ScrollView,
     Dimensions,
     TextInput,
+    Image,
+    PermissionsAndroid,
+    Platform
 } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { useTheme } from '../../../context/ThemeContext';
 import { useFont } from "../../../context/FontContext";
@@ -29,6 +33,7 @@ export default function HistoryDetailScreen() {
     const [reviewVisible, setReviewVisible] = useState(false);
     const [rating, setRating] = useState(0);
     const [reviewContent, setReviewContent] = useState('');
+    const [selectedImages, setSelectedImages] = useState([]);
 
     if (!fontsLoaded) {
         return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
@@ -76,6 +81,72 @@ export default function HistoryDetailScreen() {
             </TouchableOpacity>
         ));
     };
+
+
+    // 이미지 선택 함수
+    const pickImages = async () => {
+        const hasPerm = await requestGalleryPermission();
+        if (!hasPerm) {
+            alert('갤러리 접근 권한이 필요합니다.');
+            return;
+        }
+
+        launchImageLibrary(
+            {
+                mediaType: 'photo',
+                selectionLimit: 0,       // 0 = unlimited (여러 장 선택 허용)
+                includeBase64: false,
+            },
+            (response) => {
+                if (response.didCancel) return;
+                if (response.errorCode) {
+                    console.warn(response.errorMessage);
+                    return;
+                }
+                if (response.assets) {
+                    // URI 리스트만 저장
+                    setSelectedImages(response.assets.map(asset => asset.uri));
+                }
+            }
+        );
+    };
+
+    // 이미지 삭제 함수
+    const removeImage = (index) => {
+        setSelectedImages((images) =>
+            images.filter((_, i) => i !== index)
+        );
+    };
+
+    // 갤러리 접근권한
+    const requestGalleryPermission = async () => {
+        if (Platform.OS !== 'android') return true;
+
+        if (Platform.Version >= 33) {
+            // Android 13 이상
+            const status = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+                {
+                    title: '이미지 접근 권한',
+                    message: '앱에서 사진을 불러오려면 권한이 필요합니다.',
+                    buttonPositive: '확인',
+                    buttonNegative: '취소',
+                }
+            );
+            return status === PermissionsAndroid.RESULTS.GRANTED;
+        } else {
+            // Android 12 이하
+            const statuses = await PermissionsAndroid.requestMultiple([
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            ]);
+            return (
+                statuses['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+            );
+        }
+    };
+
+
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -181,13 +252,34 @@ export default function HistoryDetailScreen() {
                         </View>
                         {/* 사진 영역 */}
                         <View style={{ flexDirection:'row', alignItems:'center', marginVertical:15 }}>
-                            <View style={{ width:80, height:80, backgroundColor:'#e0e0e0', justifyContent:'center', alignItems:'center' }}>
-                                <Text>사진</Text>
-                            </View>
-                            <TouchableOpacity style={{ marginLeft:10 }}>
+                            {selectedImages.length > 0 ? (
+                                selectedImages.map((uri, idx) => (
+                                    <TouchableOpacity
+                                        key={idx}
+                                        onPress={() => removeImage(idx)}
+                                        style={{ marginRight: 5, marginBottom: 5 }}
+                                    >
+                                        <Image
+                                            source={{ uri }}
+                                            style={{ width: 80, height: 80, borderRadius: 8 }}
+                                        />
+                                    </TouchableOpacity>
+                                ))
+                            ) : (
+                                <View style={{
+                                    width: 80,
+                                    height: 80,
+                                    backgroundColor: '#e0e0e0',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}>
+                                    <Text>사진</Text>
+                                </View>
+                            )}
+                        </View>
+                            <TouchableOpacity style={{ marginLeft:10 }} onPress={pickImages}>
                                 <Text style={{ fontSize:16 }}>+ 사진 추가</Text>
                             </TouchableOpacity>
-                        </View>
                         {/* 별점 */}
                         <View style={{ flexDirection:'row', marginVertical:10 }}>
                             {renderStars()}
