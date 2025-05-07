@@ -26,7 +26,6 @@ export default function HistoryDetailScreen() {
     const { isDarkMode } = useTheme();
     const { fontsLoaded } = useFont();
     const [selectedPlace, setSelectedPlace] = useState(null);
-    const [reservationVisible, setReservationVisible] = useState(false);
     const mapRef = useRef(null);
     const { places } = useContext(PlacesContext);
     const colors = isDarkMode ? darkColors : lightColors;
@@ -187,9 +186,6 @@ export default function HistoryDetailScreen() {
                         <TouchableOpacity onPress={() => setSelectedPlace(place)}>
                             <Text style={[home.tabButton, { color: colors.text, backgroundColor: '#F57C00', paddingVertical: 10 }]}>음식점 정보</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setReservationVisible(true)}>
-                            <Text style={[home.tabButton, { color: colors.text, backgroundColor: '#F57C00', paddingVertical: 10 }]}>예약</Text>
-                        </TouchableOpacity>
                     </View>
                 ))}
             </ScrollView>
@@ -253,18 +249,20 @@ export default function HistoryDetailScreen() {
                         {/* 사진 영역 */}
                         <View style={{ flexDirection:'row', alignItems:'center', marginVertical:15 }}>
                             {selectedImages.length > 0 ? (
-                                selectedImages.map((uri, idx) => (
-                                    <TouchableOpacity
-                                        key={idx}
-                                        onPress={() => removeImage(idx)}
-                                        style={{ marginRight: 5, marginBottom: 5 }}
-                                    >
-                                        <Image
-                                            source={{ uri }}
-                                            style={{ width: 80, height: 80, borderRadius: 8 }}
-                                        />
-                                    </TouchableOpacity>
-                                ))
+                                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                                    {selectedImages.map((uri, idx) => (
+                                        <TouchableOpacity
+                                            key={idx}
+                                            onPress={() => removeImage(idx)}
+                                            style={{ marginRight: 5, marginBottom: 5 }}
+                                        >
+                                            <Image
+                                                source={{ uri }}
+                                                style={{ width: 80, height: 80, borderRadius: 8 }}
+                                            />
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
                             ) : (
                                 <View style={{
                                     width: 80,
@@ -312,22 +310,6 @@ export default function HistoryDetailScreen() {
                                 <Text style={{ color:'#fff', fontSize:16 }}>닫기</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
-                </Modal>
-            )}
-
-
-            {/* 예약 모달 */}
-            {reservationVisible && (
-                <Modal visible={true} transparent animationType="slide">
-                    <View style={common.modal}>
-                        <Text style={{ fontSize: 30, marginTop: 10, fontFamily: 'Jua' }}>예약</Text>
-                        <Text>날짜: 2025-01-01</Text>
-                        <Text>시간: 09:00</Text>
-                        <Text>인원: 2명</Text>
-                        <TouchableOpacity onPress={() => setReservationVisible(false)}>
-                            <Text style={{ color: 'green', marginTop: 20 }}>예약 완료</Text>
-                        </TouchableOpacity>
                     </View>
                 </Modal>
             )}
