@@ -6,6 +6,7 @@ import drawer from './drawer';
 import { lightColors, darkColors } from './colors';
 import home from './home';
 import allergy from "./allergy";
+import region from './region';
 
 
 export {
@@ -18,6 +19,7 @@ export {
     darkColors,
     home,
     allergy,
+    region,
 
 };
 
