@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Image, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { common, auth, lightColors, darkColors } from '../../styles';
 
 export default function LoginScreen() {
@@ -19,7 +19,7 @@ export default function LoginScreen() {
         }
         console.log('로그인 시도:', { phone, password });
         Alert.alert('로그인 성공', `${phone}님 환영합니다!`);
-        router.push('/home');
+        router.replace('/home');
     };
 
     return (

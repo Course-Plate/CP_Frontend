@@ -1,7 +1,7 @@
 // app/_layout.js
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
 function LayoutInner() {
     const pathname = usePathname();

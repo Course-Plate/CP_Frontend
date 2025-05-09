@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { useRouter } from 'expo-router';

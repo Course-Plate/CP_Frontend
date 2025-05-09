@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { common, preference, lightColors, darkColors } from '../../styles';
 import BackButton from '../../components/BackButton'; // ✅ 추가
 
@@ -43,7 +43,7 @@ export default function PreferenceScreen() {
             budget,
         };
         await AsyncStorage.setItem('preferences', JSON.stringify(preferences));
-        router.push('/home');
+        router.replace('/home');
     };
 
     const renderButton = (label, selected, onPress, key) => (

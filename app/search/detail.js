@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, StyleSheet, SafeAreaView, ScrollView, Linking, Image } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
 
 export default function StoreDetailScreen() {

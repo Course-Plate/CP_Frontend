@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import BackButton from '../../components/BackButton';
 import { common, region, lightColors, darkColors } from '../../styles';
 
@@ -59,7 +59,7 @@ export default function RegionScreen() {
         try {
             await AsyncStorage.setItem('selectedRegion', JSON.stringify(region));
             Alert.alert('저장 완료', `${selectedProvince} ${selectedCity} 저장됨`);
-            router.push('/home');
+            router.replace('/home');
         } catch (e) {
             console.error('지역 저장 실패', e);
         }

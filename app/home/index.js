@@ -6,12 +6,12 @@ import {
     Text,
     Image,
     TouchableOpacity,
-    Alert,
+    Alert, BackHandler,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
 import SlideDrawer from '../../components/SlideDrawer';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
     common,
     home,
@@ -23,6 +23,8 @@ export default function HomeScreen() {
     const [userName, setUserName] = useState('사용자');
     const [menuOpen, setMenuOpen] = useState(false);
     const [region, setRegion] = useState(null);
+    const [selectedTab, setSelectedTab] = useState('region');
+    const [preferences, setPreferences] = useState(null);
 
     const router = useRouter();
     const { isDarkMode } = useTheme();
@@ -35,8 +37,41 @@ export default function HomeScreen() {
 
             const regionData = await AsyncStorage.getItem('selectedRegion');
             if (regionData) setRegion(JSON.parse(regionData));
+
+            const preferenceData = await AsyncStorage.getItem('preferences');
+            if (preferenceData) setPreferences(JSON.parse(preferenceData));
         };
         loadData();
+    }, []);
+
+    useEffect(() => {
+        const backAction = () => {
+            // Alert을 띄워 사용자에게 확인을 요청
+            Alert.alert(
+                "종료", // 제목
+                "CoursePlate를 종료하시겠습니까?", // 내용
+                [
+                    {
+                        text: "취소", // 취소 버튼
+                        onPress: () => null, // 아무 동작도 하지 않음
+                        style: "cancel",
+                    },
+                    {
+                        text: "확인", // 확인 버튼
+                        onPress: () => BackHandler.exitApp(), // 앱 종료
+                    },
+                ],
+                { cancelable: false } // Alert 밖을 클릭해도 닫히지 않음
+            );
+            return true; // 뒤로가기 이벤트를 처리했음을 반환
+        };
+
+        // 뒤로가기 버튼 이벤트 리스너 추가
+        BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        // 컴포넌트 언마운트 시 리스너 제거
+        return () =>
+            BackHandler.removeEventListener('hardwareBackPress', backAction);
     }, []);
 
     const handleLogout = async () => {
@@ -71,22 +106,60 @@ export default function HomeScreen() {
                 </View>
             </View>
 
-            {/* 지역 카드 */}
+            {/* 탭 버튼 */}
+            <View style={home.tabRow}>
+                {['region', 'preference'].map((tab) => (
+                    <TouchableOpacity
+                        key={tab}
+                        onPress={() => setSelectedTab(tab)}
+                        style={[
+                            home.tabButton,
+                            selectedTab === tab
+                                ? home.tabActive
+                                : { backgroundColor: isDarkMode ? '#444' : '#eee' },
+                        ]}
+                    >
+                        <Text
+                            style={[
+                                selectedTab === tab
+                                    ? home.tabTextActive
+                                    : { color: isDarkMode ? '#aaa' : '#333', fontWeight: 'bold' },
+                            ]}
+                        >
+                            {tab === 'region' ? '여행 지역' : '음식 취향'}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+
+            {/* 지역 카드 또는 취향 설문 카드 */}
             <View style={[common.cardBox, { backgroundColor: colors.card }]}>
-                <Text style={[home.cardText, { color: colors.text }]}>
-                    {region
-                        ? `${region.province} ${region.city}`
-                        : '지역을 설정하지 않았습니다'}
+                <Text style={[home.cardText, { color: colors.text, textAlign: 'left' }]}>
+                    {selectedTab === 'region'
+                        ? region
+                            ? `${region.province} ${region.city}`
+                            : '지역을 설정하지 않았습니다'
+                        : preferences
+                            ? `음식 취향: ${preferences.type}\n\n알레르기: ${preferences.allergy.join(', ')}\n\n매운맛: ${preferences.spicy}\n\n온도: ${preferences.temperature}\n\n예산: ${preferences.budget}`
+                            : '취향 설문을 하지 않았습니다'}
                 </Text>
                 <TouchableOpacity
                     style={[common.button, { backgroundColor: colors.accent }]}
-                    onPress={() => router.push('/preference/region')}
+                    onPress={() => {
+                        if (selectedTab === 'region') {
+                            router.push('/preference/region');
+                        } else {
+                            router.push('/preference');
+                        }
+                    }}
                 >
                     <Text style={[common.buttonText, { color: '#fff' }]}>
-                        {region ? '재선택' : '설정하기'}
+                        {selectedTab === 'region' ? (region ? '재선택' : '설정하기') : '취향 설문하기'}
                     </Text>
                 </TouchableOpacity>
             </View>
+
 
             {/* 하단 버튼 */}
             <View style={home.bottomRow}>
