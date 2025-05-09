@@ -9,6 +9,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../contexts/ThemeContext';
 import { common, preference, lightColors, darkColors } from '../../styles';
+import BackButton from '../../components/BackButton'; // ✅ 추가
 
 export default function PreferenceScreen() {
     const router = useRouter();
@@ -73,7 +74,12 @@ export default function PreferenceScreen() {
                 { backgroundColor: colors.background },
             ]}
         >
-            <Text style={[common.title, { color: colors.text }]}>취향 조사</Text>
+            {/* ✅ 뒤로가기 버튼 */}
+            <BackButton
+                label="뒤로가기"
+                style={{ alignSelf: 'flex-start', marginBottom: 10 }}
+                textStyle={{ color: colors.text }}
+            />
 
             <View style={[preference.card, { backgroundColor: colors.card }]}>
                 {/* 선호 유형 */}
@@ -84,7 +90,7 @@ export default function PreferenceScreen() {
                     )}
                 </View>
 
-                {/* 알러지 라우팅 */}
+                {/* 알러지 */}
                 <Text style={[preference.label, { color: colors.text }]}>알레르기 성분</Text>
                 <TouchableOpacity
                     onPress={() => router.push('/preference/allergy')}
@@ -122,7 +128,7 @@ export default function PreferenceScreen() {
                     )}
                 </View>
 
-                {/* 온도 선호 */}
+                {/* 온도 */}
                 <Text style={[preference.label, { color: colors.text }]}>온도 선호</Text>
                 <View style={preference.optionRow}>
                     {['HOT', 'COLD'].map((opt) =>
@@ -138,6 +144,7 @@ export default function PreferenceScreen() {
                     )}
                 </View>
 
+                {/* 완료 버튼 */}
                 <TouchableOpacity style={preference.submitBtn} onPress={savePreferences}>
                     <Text style={preference.submitText}>설문 완료</Text>
                 </TouchableOpacity>

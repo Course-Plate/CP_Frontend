@@ -1,14 +1,16 @@
+// app/_layout.js
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { ThemeProvider, useTheme } from '../contexts/ThemeContext'; // ✅ useTheme 추가
+import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 
 function LayoutInner() {
     const pathname = usePathname();
     const router = useRouter();
-    const { isDarkMode } = useTheme(); // ✅ 다크모드 상태 가져오기
+    const { isDarkMode } = useTheme();
 
     const hideHeaderLogo = pathname === '/login' || pathname === '/signup';
     const headerBgColor = isDarkMode ? '#1e1e1e' : '#fff';
+    const logoColor = isDarkMode ? '#fff' : '#000';
 
     return (
         <Stack
@@ -18,19 +20,19 @@ function LayoutInner() {
                     hideHeaderLogo ? null : (
                         <TouchableOpacity onPress={() => router.push('/home')}>
                             <Text style={styles.logo}>
-                                <Text style={styles.course}>Course</Text>
+                                <Text style={[styles.course, { color: logoColor }]}>Course</Text>
                                 <Text style={styles.plate}>Plate</Text>
                             </Text>
                         </TouchableOpacity>
                     ),
                 headerTitleAlign: 'left',
                 headerStyle: {
-                    backgroundColor: headerBgColor, // ✅ 다크모드 반영
+                    backgroundColor: headerBgColor,
                 },
                 contentStyle: {
-                    backgroundColor: headerBgColor, // ✅ 전환 중 배경색 적용
+                    backgroundColor: headerBgColor,
                 },
-                animation: 'fade', // ✨ 자연스러운 전환
+                animation: 'fade',
             }}
         />
     );
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     course: {
-        color: '#000',
+        // 동적으로 색상 지정
     },
     plate: {
         color: '#F57C00',
