@@ -16,7 +16,7 @@ import PrimaryButton from '../../components/PrimaryButton';
 import { common, auth, lightColors, darkColors } from '../../styles';
 import { useTheme } from '../../context/ThemeContext';
 
-export default function SignupScreen() {
+export default function Index() {
     const router = useRouter();
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
@@ -107,17 +107,18 @@ export default function SignupScreen() {
                     />
 
                     <View style={auth.row}>
-                        <CustomInput
-                            placeholder="전화번호 (- 없이)"
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                            backgroundColor={colors.inputBg}
-                            color={colors.text}
-                            borderColor={colors.border}
-                            placeholderTextColor={colors.placeholder}
-                            style={{flex: 1}}
-                        />
+                        <View style={{ flex: 1 }}>
+                            <CustomInput
+                                placeholder="전화번호 (- 없이)"
+                                value={phone}
+                                onChangeText={setPhone}
+                                keyboardType="phone-pad"
+                                backgroundColor={colors.inputBg}
+                                color={colors.text}
+                                borderColor={colors.border}
+                                placeholderTextColor={colors.placeholder}
+                            />
+                        </View>
                         <TouchableOpacity
                             style={[auth.verifyButton, { backgroundColor: colors.accent }]}
                             onPress={handleRequestVerification}

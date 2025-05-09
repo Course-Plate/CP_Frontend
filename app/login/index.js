@@ -19,7 +19,7 @@ export default function LoginScreen() {
         }
         console.log('로그인 시도:', { phone, password });
         Alert.alert('로그인 성공', `${phone}님 환영합니다!`);
-        router.push('/home');
+        router.replace('/home');
     };
 
     return (

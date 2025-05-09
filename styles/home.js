@@ -71,4 +71,23 @@ export default StyleSheet.create({
         height: 48,
         resizeMode: 'contain',
     },
+    cardRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    cardEdit: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    cardSummary: {
+        fontSize: 14,
+        color: '#888',
+    },
+
 });

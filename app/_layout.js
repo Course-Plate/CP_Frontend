@@ -1,14 +1,14 @@
+// app/_layout.js
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { AppProviders } from "../context/AppContext";
 import { StatusBar } from "expo-status-bar";
-import { ThemeProvider, useTheme } from '../context/ThemeContext'; // ✅ useTheme 추가
 
 function LayoutInner() {
     const pathname = usePathname();
     const router = useRouter();
-    const { isDarkMode } = useTheme(); // ✅ 다크모드 상태 가져오기
-
+    const { isDarkMode } = useTheme();
     const hideHeaderLogo = pathname === '/login' || pathname === '/signup';
     const headerBgColor = isDarkMode ? '#1e1e1e' : '#fff';
     const course = isDarkMode ? '#f0f0f0' : '#fff';
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     course: {
-        color: '#000',
+        // 동적으로 색상 지정
     },
     plate: {
         color: '#F57C00',

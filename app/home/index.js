@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Stack, useRouter } from 'expo-router';
-import { View, Text, ImageBackground, Image, TouchableOpacity, Modal } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    Alert, BackHandler,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack, useRouter } from 'expo-router';
 import SlideDrawer from '../../components/SlideDrawer';
 import { useTheme } from '../../context/ThemeContext';
 import {
@@ -10,55 +16,68 @@ import {
     lightColors,
     darkColors,
 } from '../../styles';
-import drawer from '../../styles/drawer';
-import PrimaryButton from '../../components/PrimaryButton';
-import { useFont } from "../../context/FontContext";  // FontContext 가져오기
-import { usePreferences } from "../../context/PreferencesContext";
-
-
-// 알림창 알림문구 설정 함수
-const setModalMessage = (isLocationSet, isTasteSurveyCompleted) => {
-    if (!isLocationSet && !isTasteSurveyCompleted) {
-        return "여행 지역 설정과 음식 취향 설문을 완료하세요";
-    } else if (!isLocationSet) {
-        return "여행 지역을 설정하세요";
-    } else if (!isTasteSurveyCompleted) {
-        return "음식 취향 설문을 완료하세요";
-    } else {
-        return "설정 완료";
-    }
-}
+import { useFont } from "../../context/FontContext";
 
 export default function HomeScreen() {
 
     const router = useRouter();
     const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
     const { isDarkMode } = useTheme();
-    const { isLocationSet, isTasteSurveyCompleted } = usePreferences();
     const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
-    const [ModalMessage, setModalMessageState] = useState(setModalMessage(isLocationSet, isTasteSurveyCompleted));   // 알림창 알림문구
     const [userName, setUserName] = useState('사용자');
     const [menuOpen, setMenuOpen] = useState(false);
+    const [region, setRegion] = useState(null);
     const [selectedTab, setSelectedTab] = useState('region');
+    const [preferences, setPreferences] = useState(null);
     const colors = isDarkMode ? darkColors : lightColors;
 
-
-    // isLocationSet과 isTasteSurveyCompleted가 변경될 때마다 ModalMessage를 업데이트
-    useEffect(() => {
-        setModalMessageState(setModalMessage(isLocationSet, isTasteSurveyCompleted));
-    }, [isLocationSet, isTasteSurveyCompleted]);
     if (!fontsLoaded) {
         return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
-
     }
 
-    // 사용자 이름 불러오기
+    
     useEffect(() => {
-        const loadUser = async () => {
+        const loadData = async () => {
             const name = await AsyncStorage.getItem('userName');
             if (name) setUserName(name);
+
+            const regionData = await AsyncStorage.getItem('selectedRegion');
+            if (regionData) setRegion(JSON.parse(regionData));
+
+            const preferenceData = await AsyncStorage.getItem('preferences');
+            if (preferenceData) setPreferences(JSON.parse(preferenceData));
         };
-        loadUser();
+        loadData();
+    }, []);
+
+    useEffect(() => {
+        const backAction = () => {
+            // Alert을 띄워 사용자에게 확인을 요청
+            Alert.alert(
+                "종료", // 제목
+                "CoursePlate를 종료하시겠습니까?", // 내용
+                [
+                    {
+                        text: "취소", // 취소 버튼
+                        onPress: () => null, // 아무 동작도 하지 않음
+                        style: "cancel",
+                    },
+                    {
+                        text: "확인", // 확인 버튼
+                        onPress: () => BackHandler.exitApp(), // 앱 종료
+                    },
+                ],
+                { cancelable: false } // Alert 밖을 클릭해도 닫히지 않음
+            );
+            return true; // 뒤로가기 이벤트를 처리했음을 반환
+        };
+
+        // 뒤로가기 버튼 이벤트 리스너 추가
+        BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        // 컴포넌트 언마운트 시 리스너 제거
+        return () =>
+            BackHandler.removeEventListener('hardwareBackPress', backAction);
     }, []);
 
 
@@ -88,7 +107,6 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                         <Text style={[home.nameText]}>{userName}</Text>
                     </View>
-
                     <TouchableOpacity onPress={() => setMenuOpen(true)}>
                         <Image
                             source={require('../../assets/home/slider.png')}
@@ -127,25 +145,34 @@ export default function HomeScreen() {
                 ))}
             </View>
 
-            {/* 카드 */}
-            <View style={common.section}>
-                <Text style={[home.cardText, { color: colors.text }]}>
+
+            {/* 지역 카드 또는 취향 설문 카드 */}
+            <View style={[common.cardBox, { backgroundColor: colors.card }]}>
+                <Text style={[home.cardText, { color: colors.text, textAlign: 'left' }]}>
                     {selectedTab === 'region'
-                        ? '지역을 설정하지 않았습니다'
-                        : '취향 설문을 하지 않았습니다'}
+                        ? region
+                            ? `${region.province} ${region.city}`
+                            : '지역을 설정하지 않았습니다'
+                        : preferences
+                            ? `음식 취향: ${preferences.type}\n\n알레르기: ${preferences.allergy.join(', ')}\n\n매운맛: ${preferences.spicy}\n\n온도: ${preferences.temperature}\n\n예산: ${preferences.budget}`
+                            : '취향 설문을 하지 않았습니다'}
                 </Text>
                 <TouchableOpacity
-                    style={[common.button, { backgroundColor: colors.accent, marginBottom: 0 }]}
-                    onPress={() =>
-                        selectedTab === 'preference' &&
-                        router.push('/preference')
-                    }
+                    style={[common.button, { backgroundColor: colors.accent }]}
+                    onPress={() => {
+                        if (selectedTab === 'region') {
+                            router.push('/preference/region');
+                        } else {
+                            router.push('/preference');
+                        }
+                    }}
                 >
                     <Text style={[common.buttonText, { color: '#fff' }]}>
-                        {selectedTab === 'region' ? '설정하기' : '취향 설문하기'}
+                        {selectedTab === 'region' ? (region ? '재선택' : '설정하기') : '취향 설문하기'}
                     </Text>
                 </TouchableOpacity>
             </View>
+
 
             {/* 하단 버튼 */}
             <View style={home.bottomRow}>
@@ -162,10 +189,10 @@ export default function HomeScreen() {
                 <TouchableOpacity
                     style={[home.bottomButton, { backgroundColor: colors.card }]}
                     onPress={() => {
-                        if (ModalMessage === '설정 완료') {
-                            router.push('/search');
+                        if (!region) {
+                            Alert.alert('지역 미설정', '검색을 하기 위해 먼저 지역을 설정해주세요.');
                         } else {
-                            setModalVisible(true);
+                            router.push('/search');
                         }
                     }}
                 >
@@ -205,43 +232,34 @@ export default function HomeScreen() {
                 onClose={() => setMenuOpen(false)}
                 backgroundColor={colors.background}
             >
-                <Text style={[drawer.drawerTitle, { color: colors.text }]}>
-                    설정 메뉴
-                </Text>
+                <Text style={[common.drawerTitle, { color: colors.text }]}>설정 메뉴</Text>
 
                 <TouchableOpacity
-                    style={[
-                        drawer.drawerItem,
-                        {
-                            borderBottomColor: isDarkMode ? '#333' : '#ddd',
-                            borderBottomWidth: 1,
-                        },
-                    ]}
+                    style={[common.drawerItem, {
+                        borderBottomColor: colors.border,
+                        borderBottomWidth: 1,
+                        paddingVertical: 14,
+                    }]}
                     onPress={() => router.push('/home_slider/setting')}
                 >
-                    <Text style={[drawer.drawerItemText, { color: colors.text }]}>
-                        설정
-                    </Text>
+                    <Text style={{ fontSize: 16, color: colors.text }}>설정</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[
-                        drawer.drawerItem,
-                        {
-                            borderBottomColor: isDarkMode ? '#333' : '#ddd',
-                            borderBottomWidth: 1,
-                        },
-                    ]}
+                    style={[common.drawerItem, {
+                        borderBottomColor: colors.border,
+                        borderBottomWidth: 1,
+                        paddingVertical: 14,
+                    }]}
                 >
-                    <Text style={[drawer.drawerItemText, { color: colors.text }]}>
-                        알림
-                    </Text>
+                    <Text style={{ fontSize: 16, color: colors.text }}>알림</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={handleLogout} style={drawer.drawerItem}>
-                    <Text style={[drawer.drawerItemText, { color: colors.text }]}>
-                        로그아웃
-                    </Text>
+                <TouchableOpacity
+                    onPress={handleLogout}
+                    style={[common.drawerItem, { paddingVertical: 14 }]}
+                >
+                    <Text style={{ fontSize: 16, color: colors.text }}>로그아웃</Text>
                 </TouchableOpacity>
             </SlideDrawer>
         </View>
