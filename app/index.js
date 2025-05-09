@@ -8,8 +8,8 @@ export default function Index() {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            router.replace('/login');
-        }, 100); // 약간의 지연
+            router.replace('/history');
+        }, 500); // 약간의 지연
 
         return () => clearTimeout(timeout);
     }, []);

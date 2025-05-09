@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "couseplate-frontend",
-    "slug": "couseplate-frontend",
+    "name": "courseplate-frontend",
+    "slug": "courseplate-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,10 +19,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jy01.courseplatefrontend"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-build-properties"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0300b605-abbc-4aa5-9a18-415f69da9f83"
+      }
     }
   }
 }

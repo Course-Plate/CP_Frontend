@@ -17,7 +17,6 @@ export default StyleSheet.create({
         alignItems: 'center',
         width: '100%',
         gap: 8,
-        marginBottom: 16,
     },
     verifyButton: {
         height: 50,

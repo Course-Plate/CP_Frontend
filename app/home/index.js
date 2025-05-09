@@ -1,5 +1,3 @@
-// React Native - 홈 화면 (음식 취향 탭 및 관련 UI 제거)
-
 import React, { useEffect, useState } from 'react';
 import {
     View,
@@ -18,18 +16,26 @@ import {
     lightColors,
     darkColors,
 } from '../../styles';
+import { useFont } from "../../context/FontContext";
 
 export default function HomeScreen() {
+
+    const router = useRouter();
+    const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
+    const { isDarkMode } = useTheme();
+    const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
     const [userName, setUserName] = useState('사용자');
     const [menuOpen, setMenuOpen] = useState(false);
     const [region, setRegion] = useState(null);
     const [selectedTab, setSelectedTab] = useState('region');
     const [preferences, setPreferences] = useState(null);
-
-    const router = useRouter();
-    const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
 
+    if (!fontsLoaded) {
+        return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
+    }
+
+    
     useEffect(() => {
         const loadData = async () => {
             const name = await AsyncStorage.getItem('userName');
@@ -74,11 +80,14 @@ export default function HomeScreen() {
             BackHandler.removeEventListener('hardwareBackPress', backAction);
     }, []);
 
+
+    // 로그아웃
     const handleLogout = async () => {
         await AsyncStorage.clear();
         setMenuOpen(false);
         router.replace('/login');
     };
+
 
     return (
         <View style={[{ flex: 1, backgroundColor: colors.background }]}>
@@ -86,10 +95,11 @@ export default function HomeScreen() {
 
             {/* 상단 배경 */}
             <View style={home.header}>
-                <Image
+                <ImageBackground
                     source={require('../../assets/main-bg.png')}
                     style={home.backgroundImage}
                 />
+
                 <View style={home.topRow}>
                     <View style={home.leftProfile}>
                         <TouchableOpacity onPress={() => router.push('/profile')}>
@@ -104,6 +114,9 @@ export default function HomeScreen() {
                         />
                     </TouchableOpacity>
                 </View>
+
+                <Text style={common.headerText1}>Course Plate</Text>
+                <Text style={common.headerText2}>Find your favorite food!</Text>
             </View>
 
             {/* 탭 버튼 */}
@@ -189,6 +202,29 @@ export default function HomeScreen() {
                     />
                 </TouchableOpacity>
             </View>
+
+            {/* 알림창 */}
+            <Modal
+                animationType="fade" // 모달 애니메이션 설정
+                transparent={true}  // 모달의 배경을 투명하게 설정
+                visible={modalVisible}  // 모달의 visible 상태가 true일 때만 보이게
+                onRequestClose={() => setModalVisible(false)}  // 안드로이드에서 뒤로 가기 버튼 눌렀을 때 모달 닫기
+            >
+                <View style={common.modal}>
+
+                    <Text style={[
+                        common.verifyText,
+                        {fontSize: 20, lineHeight: 30, textAlign: 'center', color: 'black', padding: 25}
+                    ]}>{ModalMessage}</Text>
+
+                    <PrimaryButton
+                        title="확인"
+                        onPress={() => setModalVisible(false)}
+                        style={{width: 100, backgroundColor: '#F57C00'}}
+                        disabled={false}
+                    />
+                </View>
+            </Modal>
 
             {/* 슬라이드 메뉴 */}
             <SlideDrawer
