@@ -1,9 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
     View,
     Text,
     ScrollView,
-    TouchableOpacity,
+    TouchableOpacity, BackHandler,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,11 +24,31 @@ export default function PreferenceScreen() {
 
     const budgetOptions = ['10만원', '20만원', '30만원', '40만원'];
 
+    const handleBackPress = () => {
+        router.back(); // 뒤로 가기
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
+
     useFocusEffect(
         useCallback(() => {
             const loadAllergy = async () => {
-                const stored = await AsyncStorage.getItem('allergy');
-                if (stored) setSelectedAllergy(JSON.parse(stored));
+                const isSetAllergy = await AsyncStorage.getItem('isSetAllergy');
+                if (isSetAllergy === 'Y') {
+                    const stored = await AsyncStorage.getItem('allergy');
+                    const parsed = stored ? JSON.parse(stored) : [];
+                    setSelectedAllergy(parsed);
+                }
             };
             loadAllergy();
         }, [])

@@ -4,7 +4,7 @@ import {
     Text,
     Image,
     TouchableOpacity,
-    Alert, BackHandler,
+    Alert, BackHandler, ImageBackground,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
@@ -23,7 +23,6 @@ export default function HomeScreen() {
     const router = useRouter();
     const { fontsLoaded } = useFont();  // 폰트 로드 상태 가져오기
     const { isDarkMode } = useTheme();
-    const [modalVisible, setModalVisible] = useState(false);    // 알림창 활성화 상태
     const [userName, setUserName] = useState('사용자');
     const [menuOpen, setMenuOpen] = useState(false);
     const [region, setRegion] = useState(null);
@@ -73,11 +72,10 @@ export default function HomeScreen() {
         };
 
         // 뒤로가기 버튼 이벤트 리스너 추가
-        BackHandler.addEventListener('hardwareBackPress', backAction);
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
         // 컴포넌트 언마운트 시 리스너 제거
-        return () =>
-            BackHandler.removeEventListener('hardwareBackPress', backAction);
+        return () => backHandler.remove();
     }, []);
 
 
@@ -163,6 +161,7 @@ export default function HomeScreen() {
                         if (selectedTab === 'region') {
                             router.push('/preference/region');
                         } else {
+                            AsyncStorage.removeItem('allergy');
                             router.push('/preference');
                         }
                     }}
@@ -203,28 +202,6 @@ export default function HomeScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* 알림창 */}
-            <Modal
-                animationType="fade" // 모달 애니메이션 설정
-                transparent={true}  // 모달의 배경을 투명하게 설정
-                visible={modalVisible}  // 모달의 visible 상태가 true일 때만 보이게
-                onRequestClose={() => setModalVisible(false)}  // 안드로이드에서 뒤로 가기 버튼 눌렀을 때 모달 닫기
-            >
-                <View style={common.modal}>
-
-                    <Text style={[
-                        common.verifyText,
-                        {fontSize: 20, lineHeight: 30, textAlign: 'center', color: 'black', padding: 25}
-                    ]}>{ModalMessage}</Text>
-
-                    <PrimaryButton
-                        title="확인"
-                        onPress={() => setModalVisible(false)}
-                        style={{width: 100, backgroundColor: '#F57C00'}}
-                        disabled={false}
-                    />
-                </View>
-            </Modal>
 
             {/* 슬라이드 메뉴 */}
             <SlideDrawer

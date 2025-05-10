@@ -4,6 +4,8 @@ import {
     Text,
     FlatList,
     TouchableOpacity,
+    BackHandler,
+    Alert
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,20 +25,15 @@ export default function AllergyScreen() {
 
     const [selected, setSelected] = useState([]);
 
-    useEffect(() => {
-        const loadSelected = async () => {
-            const stored = await AsyncStorage.getItem('allergy');
-            if (stored) setSelected(JSON.parse(stored));
-        };
-        loadSelected();
-    }, []);
-
     const toggleSelect = (item) => {
-        setSelected((prev) =>
-            prev.includes(item)
-                ? prev.filter((i) => i !== item)
-                : [...prev, item]
-        );
+        setSelected((prev) => {
+            // 배열이 이전 상태를 기반으로 새로운 상태를 반환하도록 함
+            if (prev.includes(item)) {
+                return prev.filter((i) => i !== item); // 이미 선택된 항목이면 삭제
+            } else {
+                return [...prev, item]; // 선택되지 않은 항목이면 추가
+            }
+        });
     };
 
     const removeTag = (item) => {
@@ -44,8 +41,14 @@ export default function AllergyScreen() {
     };
 
     const saveSelection = async () => {
-        await AsyncStorage.setItem('allergy', JSON.stringify(selected));
-        router.back();
+        try {
+            await AsyncStorage.removeItem('allergy'); // 기존 알레르기 항목 삭제
+            await AsyncStorage.setItem('allergy', JSON.stringify(selected)); // 새로운 알레르기 항목 저장
+            await AsyncStorage.setItem('isSetAllergy', 'Y');
+            router.back();
+        } catch (error) {
+            console.error('Error saving allergy selection:', error);
+        }
     };
 
     const renderItem = ({ item }) => {
@@ -93,8 +96,9 @@ export default function AllergyScreen() {
             )}
 
             <FlatList
+                removeClippedSubviews={false}
                 data={ALLERGY_OPTIONS}
-                keyExtractor={(item) => item}
+                keyExtractor={(item) => item} // 고유한 key 제공
                 renderItem={renderItem}
                 contentContainerStyle={{ paddingTop: 24, paddingBottom: 80 }}
             />

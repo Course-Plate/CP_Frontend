@@ -1,18 +1,36 @@
 // app/search/detail.js
-import React from 'react';
-import { Text, StyleSheet, SafeAreaView, ScrollView, Linking, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import { Text, StyleSheet, SafeAreaView, ScrollView, Linking, Image, BackHandler } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
+import { useRouter } from 'expo-router';
 
 export default function StoreDetailScreen() {
     const { title, desc, address, tel, link, category, image } = useLocalSearchParams();
     const { isDarkMode } = useTheme();
+    const router = useRouter();
     const colors = isDarkMode ? darkColors : lightColors;
 
     const openLink = () => {
         if (link) Linking.openURL(link);
     };
+
+    const handleBackPress = () => {
+        router.back(); // 뒤로 가기
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

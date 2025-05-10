@@ -7,14 +7,15 @@ import {
     ActivityIndicator,
     SafeAreaView,
     Button,
-    TouchableOpacity,
+    TouchableOpacity, BackHandler,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import * as NaverMap from '@mj-studio/react-native-naver-map';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { useRouter } from 'expo-router';
+import { NAVER_CLIENT_ID, NAVER_CLIENT_SECRET } from '@env';
 
 const FOOD_TYPES = ['전체', '한식', '중식', '일식', '양식', '분식', '카페', '디저트', '패스트푸드'];
 
@@ -30,11 +31,24 @@ export default function SearchScreen() {
     const markerRefs = useRef([]);
     const router = useRouter();
 
+    const handleBackPress = () => {
+        router.back(); // 뒤로 가기
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
+
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
-
-    const clientId = 'iLXrZabO7JX6_f_k6lKG';
-    const clientSecret = 'WmukCkOQMF';
 
     const fetchStoresFromNaver = async (query) => {
         const encodedQuery = encodeURIComponent(query);
@@ -43,8 +57,8 @@ export default function SearchScreen() {
         try {
             const response = await fetch(url, {
                 headers: {
-                    'X-Naver-Client-Id': clientId,
-                    'X-Naver-Client-Secret': clientSecret,
+                    'X-Naver-Client-Id': NAVER_CLIENT_ID, // 환경 변수 사용
+                    'X-Naver-Client-Secret': NAVER_CLIENT_SECRET, // 환경 변수 사용
                 },
             });
 
@@ -112,7 +126,7 @@ export default function SearchScreen() {
     const handleStorePress = (store, index) => {
         setSelectedIndex(index);
         if (mapRef.current) {
-            mapRef.current.animateToRegion({
+            mapRef.current.animateCameraTo({
                 latitude: parseFloat(store.mapy) / 1e7,
                 longitude: parseFloat(store.mapx) / 1e7,
                 latitudeDelta: 0.01,
@@ -137,6 +151,7 @@ export default function SearchScreen() {
         return <LoadingOverlay visible={true} color={colors.accent} message="데이터 로딩 중..." />;
     }
 
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
             <View style={{ paddingVertical: 8, marginBottom: 4, backgroundColor: colors.background }}>
@@ -159,7 +174,7 @@ export default function SearchScreen() {
 
             {region && (
                 <View style={{ height: 280 }}>
-                    <MapView
+                    <NaverMap.NaverMapView
                         style={{ flex: 1 }}
                         region={region}
                         showsUserLocation
@@ -167,18 +182,15 @@ export default function SearchScreen() {
                     >
                         {stores.map((store, index) => (
                             store.mapx && store.mapy && (
-                                <Marker
+                                <NaverMap.NaverMapMarkerOverlay
                                     key={index}
-                                    ref={(el) => (markerRefs.current[index] = el)}
-                                    coordinate={{
-                                        latitude: parseFloat(store.mapy) / 1e7,
-                                        longitude: parseFloat(store.mapx) / 1e7,
-                                    }}
+                                    latitude= {parseFloat(store.mapy) / 1e7}
+                                    longitude= {parseFloat(store.mapx) / 1e7}
                                     pinColor={selectedIndex === index ? colors.accent : 'gray'}
                                 />
                             )
                         ))}
-                    </MapView>
+                    </NaverMap.NaverMapView>
                 </View>
             )}
 
