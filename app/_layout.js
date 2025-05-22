@@ -1,7 +1,8 @@
-// app/_layout.js
 import { Stack, usePathname, useRouter } from 'expo-router';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { useEffect } from 'react';
 import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
+import * as Location from 'expo-location';
 
 function LayoutInner() {
     const pathname = usePathname();
@@ -11,6 +12,23 @@ function LayoutInner() {
     const hideHeaderLogo = pathname === '/login' || pathname === '/signup';
     const headerBgColor = isDarkMode ? '#1e1e1e' : '#fff';
     const logoColor = isDarkMode ? '#fff' : '#000';
+
+    useEffect(() => {
+        const requestLocationPermission = async () => {
+            const { status } = await Location.getForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+                if (newStatus !== 'granted') {
+                    Alert.alert(
+                        '위치 권한 필요',
+                        '정확한 기능 제공을 위해 위치 권한이 필요합니다.'
+                    );
+                }
+            }
+        };
+
+        requestLocationPermission();
+    }, []);
 
     return (
         <Stack

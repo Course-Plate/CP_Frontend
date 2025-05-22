@@ -13,16 +13,27 @@
       "backgroundColor": "#1e1e1e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.khonan.couseplatefrontend"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.khonan.couseplatefrontend"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1c85ec7b-fa01-4f1a-aa92-0da04d09b451"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "react-native-vision-camera"
+    ]
   }
 }

@@ -1,6 +1,4 @@
-// React Native - 홈 화면 (음식 취향 탭 및 관련 UI 제거)
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -12,32 +10,51 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
 import SlideDrawer from '../../components/SlideDrawer';
 import { useTheme } from '../../contexts/ThemeContext';
-import {
-    common,
-    home,
-    lightColors,
-    darkColors,
-} from '../../styles';
+import { common, home, lightColors, darkColors } from '../../styles';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
     const [userName, setUserName] = useState('사용자');
     const [menuOpen, setMenuOpen] = useState(false);
     const [region, setRegion] = useState(null);
+    const [receiptStore, setReceiptStore] = useState(null);
 
     const router = useRouter();
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
 
     useEffect(() => {
-        const loadData = async () => {
+        const loadUserData = async () => {
             const name = await AsyncStorage.getItem('userName');
             if (name) setUserName(name);
 
             const regionData = await AsyncStorage.getItem('selectedRegion');
             if (regionData) setRegion(JSON.parse(regionData));
         };
-        loadData();
+
+        loadUserData();
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            const checkReceiptEligibility = async () => {
+                const data = await AsyncStorage.getItem('review_eligible');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    if (parsed.expiresAt > Date.now()) {
+                        setReceiptStore(parsed);
+                    } else {
+                        await AsyncStorage.removeItem('review_eligible');
+                        setReceiptStore(null);
+                    }
+                } else {
+                    setReceiptStore(null);
+                }
+            };
+
+            checkReceiptEligibility();
+        }, [])
+    );
 
     const handleLogout = async () => {
         await AsyncStorage.clear();
@@ -116,6 +133,19 @@ export default function HomeScreen() {
                     />
                 </TouchableOpacity>
             </View>
+
+            {/* 영수증 스캔 버튼 */}
+            {receiptStore && (
+                <View style={{ alignItems: 'center', marginTop: 16 }}>
+                    <TouchableOpacity
+                        onPress={() => router.push('/review')}
+                        style={[common.button, { backgroundColor: colors.accent, paddingHorizontal: 40 }]}
+                    >
+                        <Text style={[common.buttonText, { color: '#fff' }]}>📝 리뷰 작성</Text>
+                    </TouchableOpacity>
+
+                </View>
+            )}
 
             {/* 슬라이드 메뉴 */}
             <SlideDrawer
