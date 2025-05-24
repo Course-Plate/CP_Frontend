@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     View,
     Text,
-    ScrollView,
     StyleSheet,
     ActivityIndicator,
     SafeAreaView,
     Button,
-    TouchableOpacity, BackHandler,
+    TouchableOpacity,
+    BackHandler,
+    FlatList,
 } from 'react-native';
 import * as NaverMap from '@mj-studio/react-native-naver-map';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,6 +31,8 @@ export default function SearchScreen() {
     const mapRef = useRef(null);
     const markerRefs = useRef([]);
     const router = useRouter();
+    const { isDarkMode } = useTheme();
+    const colors = isDarkMode ? darkColors : lightColors;
 
     const handleBackPress = () => {
         router.back(); // 뒤로 가기
@@ -46,9 +49,6 @@ export default function SearchScreen() {
 
         return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
     }, []);
-
-    const { isDarkMode } = useTheme();
-    const colors = isDarkMode ? darkColors : lightColors;
 
     const fetchStoresFromNaver = async (query) => {
         const encodedQuery = encodeURIComponent(query);
@@ -123,7 +123,7 @@ export default function SearchScreen() {
         loadData(type);
     };
 
-    const handleStorePress = (store, index) => {
+    const handleStoreSelect = (store, index) => {
         setSelectedIndex(index);
         if (mapRef.current) {
             mapRef.current.animateCameraTo({
@@ -133,6 +133,14 @@ export default function SearchScreen() {
                 longitudeDelta: 0.01,
             });
         }
+    };
+
+    const goToDetail = (store) => {
+        console.log('선택된 가게 좌표:', {
+            mapx: store.mapx,
+            mapy: store.mapy,
+        });
+
         router.push({
             pathname: '/search/detail',
             params: {
@@ -143,9 +151,12 @@ export default function SearchScreen() {
                 link: store.link,
                 category: store.category,
                 image: store.image || null,
+                mapx: store.mapx, // ✅ 좌표 전달
+                mapy: store.mapy,
             },
         });
     };
+
 
     if (initialLoading) {
         return <LoadingOverlay visible={true} color={colors.accent} message="데이터 로딩 중..." />;
@@ -154,25 +165,30 @@ export default function SearchScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-            <View style={{ paddingVertical: 8, marginBottom: 4, backgroundColor: colors.background }}>
-                <ScrollView
+            {/* 음식 필터 */}
+            <View style={{ paddingHorizontal:15,paddingVertical: 15, marginBottom: 5 }}>
+                <FlatList
+                    data={FOOD_TYPES}
+                    keyExtractor={(item) => item}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterRow}
-                >
-                    {FOOD_TYPES.map((type) => (
-                        <View key={type} style={{ marginHorizontal: 4 }}>
+                    renderItem={({ item }) => (
+                        <View style={{ marginHorizontal: 6 }}>
                             <Button
-                                title={type}
-                                onPress={() => handleTypeSelect(type)}
-                                color={selectedType === type ? colors.accent : colors.border}
+                                title={item}
+                                onPress={() => handleTypeSelect(item)}
+                                color={selectedType === item ? colors.accent : colors.border}
                             />
                         </View>
-                    ))}
-                </ScrollView>
+                    )}
+                />
+
             </View>
 
-            {region && (
+            {/* 지도 + 리스트 */}
+            <View style={{ flex: 1 }}>
+                {/* 지도 */}
                 <View style={{ height: 280 }}>
                     <NaverMap.NaverMapView
                         style={{ flex: 1 }}
@@ -192,30 +208,66 @@ export default function SearchScreen() {
                         ))}
                     </NaverMap.NaverMapView>
                 </View>
-            )}
 
-            {loading ? (
-                <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 20 }} />
-            ) : (
-                <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.storeListContainer}>
-                    {stores.map((store, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => handleStorePress(store, index)}
-                            style={[styles.storeBox, {
-                                backgroundColor: colors.card,
-                                borderWidth: selectedIndex === index ? 2 : 0,
-                                borderColor: selectedIndex === index ? colors.accent : 'transparent'
-                            }]}
-                        >
-                            <Text style={[styles.storeName, { color: colors.text }]}> {store.title.replace(/<[^>]+>/g, '')} </Text>
-                            <Text style={{ color: colors.text }}>{store.category}</Text>
-                            <Text style={{ color: colors.text }}>{store.description}</Text>
-                            <Text style={{ color: colors.text, fontSize: 12 }}>{store.address}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            )}
+                {/* FlatList 리스트 */}
+                {loading ? (
+                    <ActivityIndicator size="large" color={colors.accent} style={{ marginTop: 20 }} />
+                ) : (
+                    <FlatList
+                        data={stores}
+                        keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+                        showsVerticalScrollIndicator
+                        keyboardShouldPersistTaps="handled"
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity
+                                onPress={() => handleStoreSelect(item, index)}
+                                style={[
+                                    styles.storeBox,
+                                    {
+                                        backgroundColor: colors.card,
+                                        borderWidth: selectedIndex === index ? 2 : 0,
+                                        borderColor: selectedIndex === index ? colors.accent : 'transparent',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        minHeight: 70,
+                                        maxHeight: 90, // 높이 제한
+                                        paddingVertical: 6,
+                                        marginBottom: 8,
+                                    },
+                                ]}
+
+                            >
+                                <View style={{ flex: 1, paddingRight: 8 }}>
+                                    <Text style={[styles.storeName, { color: colors.text, fontSize: 14 }]} numberOfLines={1}>
+                                        {item.title.replace(/<[^>]+>/g, '')}
+                                    </Text>
+                                    <Text style={{ color: colors.text, fontSize: 12 }} numberOfLines={1}>{item.category}</Text>
+                                    <Text style={{ color: colors.text, fontSize: 12 }} numberOfLines={1}>{item.description}</Text>
+                                    <Text style={{ color: colors.text, fontSize: 10 }} numberOfLines={1}>{item.address}</Text>
+                                </View>
+
+                                {selectedIndex === index && (
+                                    <TouchableOpacity
+                                        onPress={() => goToDetail(item)}
+                                        style={{
+                                            width: 36,
+                                            height: '100%',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            borderLeftWidth: 1,
+                                            borderLeftColor: colors.border,
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 18, color: colors.accent }}>{'>'}</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </TouchableOpacity>
+                        )}
+                    />
+                )}
+            </View>
         </SafeAreaView>
     );
 }
@@ -225,11 +277,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 12,
         alignItems: 'center',
-    },
-    storeListContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 20,
-        gap: 12,
     },
     storeBox: {
         borderRadius: 12,

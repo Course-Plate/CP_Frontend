@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -10,13 +10,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
 import SlideDrawer from '../../components/SlideDrawer';
 import { useTheme } from '../../context/ThemeContext';
-import {
-    common,
-    home,
-    lightColors,
-    darkColors,
-} from '../../styles';
 import { useFont } from "../../context/FontContext";
+import { common, home, lightColors, darkColors } from '../../styles';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
 
@@ -28,15 +24,16 @@ export default function HomeScreen() {
     const [region, setRegion] = useState(null);
     const [selectedTab, setSelectedTab] = useState('region');
     const [preferences, setPreferences] = useState(null);
+    const [receiptStore, setReceiptStore] = useState(null);
     const colors = isDarkMode ? darkColors : lightColors;
 
     if (!fontsLoaded) {
         return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음
     }
 
-    
+
     useEffect(() => {
-        const loadData = async () => {
+        const loadUserData = async () => {
             const name = await AsyncStorage.getItem('userName');
             if (name) setUserName(name);
 
@@ -46,7 +43,8 @@ export default function HomeScreen() {
             const preferenceData = await AsyncStorage.getItem('preferences');
             if (preferenceData) setPreferences(JSON.parse(preferenceData));
         };
-        loadData();
+
+        loadUserData();
     }, []);
 
     useEffect(() => {
@@ -78,6 +76,27 @@ export default function HomeScreen() {
         return () => backHandler.remove();
     }, []);
 
+
+    useFocusEffect(
+        useCallback(() => {
+            const checkReceiptEligibility = async () => {
+                const data = await AsyncStorage.getItem('review_eligible');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    if (parsed.expiresAt > Date.now()) {
+                        setReceiptStore(parsed);
+                    } else {
+                        await AsyncStorage.removeItem('review_eligible');
+                        setReceiptStore(null);
+                    }
+                } else {
+                    setReceiptStore(null);
+                }
+            };
+
+            checkReceiptEligibility();
+        }, [])
+    );
 
     // 로그아웃
     const handleLogout = async () => {
@@ -201,6 +220,19 @@ export default function HomeScreen() {
                     />
                 </TouchableOpacity>
             </View>
+
+            {/* 영수증 스캔 버튼 */}
+            {receiptStore && (
+                <View style={{ alignItems: 'center', marginTop: 16 }}>
+                    <TouchableOpacity
+                        onPress={() => router.push('/review')}
+                        style={[common.button, { backgroundColor: colors.accent, paddingHorizontal: 40 }]}
+                    >
+                        <Text style={[common.buttonText, { color: '#fff' }]}>📝 리뷰 작성</Text>
+                    </TouchableOpacity>
+
+                </View>
+            )}
 
 
             {/* 슬라이드 메뉴 */}
