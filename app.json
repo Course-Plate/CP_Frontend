@@ -28,8 +28,7 @@
     "plugins": [
       "expo-font",
       "expo-build-properties",
-      "expo-router",
-      "react-native-vision-camera"
+      "expo-router"
     ],
     "extra": {
       "eas": {

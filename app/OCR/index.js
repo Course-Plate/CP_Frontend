@@ -1,31 +1,34 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker'; // ✅ 변경
 import TextRecognition from 'react-native-text-recognition';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
-import LoadingOverlay from '../../components/LoadingOverlay'; // ✅ 로딩 오버레이
+import LoadingOverlay from '../../components/LoadingOverlay';
 
 export default function OCRScreen() {
     const [image, setImage] = useState(null);
-    const [loading, setLoading] = useState(false); // ✅ 로딩 상태
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
     const { isDarkMode } = useTheme();
     const colors = isDarkMode ? darkColors : lightColors;
 
     const handleImageSelect = async (fromCamera = false) => {
         try {
-            const result = fromCamera
-                ? await ImagePicker.launchCameraAsync({ quality: 1 })
-                : await ImagePicker.launchImageLibraryAsync({ quality: 1 });
+            const options = {
+                mediaType: 'photo',
+                quality: 1,
+            };
 
-            if (result.canceled) return;
+            const result = fromCamera ? await launchCamera(options) : await launchImageLibrary(options);
+
+            if (result.didCancel || !result.assets || result.assets.length === 0) return;
 
             const uri = result.assets[0].uri;
             setImage(uri);
-            setLoading(true); // ✅ 로딩 시작
+            setLoading(true);
 
             const ocrResult = await TextRecognition.recognize(uri);
             const textCombined = ocrResult.join(' ');
@@ -76,7 +79,6 @@ export default function OCRScreen() {
                 <Text style={[styles.buttonText, { color: colors.text }]}>🖼️ 갤러리에서 선택</Text>
             </TouchableOpacity>
 
-            {/* ✅ 로딩 중이면 오버레이 표시 */}
             {loading && (
                 <LoadingOverlay visible={true} color={colors.accent} message="OCR 인증 중..." />
             )}

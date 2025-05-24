@@ -1,7 +1,7 @@
 // /history/index.js
 
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, {useEffect} from 'react';
+import {View, Text, TouchableOpacity, ScrollView, BackHandler} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
@@ -17,6 +17,23 @@ export default function HistoryScreen() {
     const historyList = [
         { id: '1', date: '2025-01-01', region: '서울 종로구' },
     ];
+
+    const handleBackPress = () => {
+        router.back();
+        return true;
+    };
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            () => {
+                handleBackPress(); // 뒤로 가기 호출
+                return true; // 뒤로 가기 이벤트를 처리했다고 알려줌
+            }
+        );
+
+        return () => backHandler.remove(); // 컴포넌트 언마운트 시 이벤트 제거
+    }, []);
 
     if (!fontsLoaded) {
         return null; // 폰트가 로드될 때까지 아무것도 렌더링하지 않음

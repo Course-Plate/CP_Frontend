@@ -9,8 +9,8 @@ import {
     Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
-import { useTheme } from '../../contexts/ThemeContext';
+import { launchImageLibrary } from 'react-native-image-picker'; // ✅ 변경
+import { useTheme } from '../../context/ThemeContext';
 import { lightColors, darkColors } from '../../styles';
 import { useRouter } from 'expo-router';
 
@@ -38,13 +38,14 @@ export default function ReviewScreen() {
     }, []);
 
     const handlePickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
+        const result = await launchImageLibrary({
+            mediaType: 'photo',
             quality: 1,
-            allowsEditing: true,
         });
-        if (!result.canceled) {
-            setImageUri(result.assets[0].uri);
-        }
+
+        if (result.didCancel || !result.assets || result.assets.length === 0) return;
+
+        setImageUri(result.assets[0].uri);
     };
 
     const handleSubmit = async () => {

@@ -27,7 +27,7 @@ export default function SearchScreen() {
     const [selectedType, setSelectedType] = useState('전체');
     const [region, setRegion] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
-
+    const [showMap, setShowMap] = useState(true);
     const mapRef = useRef(null);
     const markerRefs = useRef([]);
     const router = useRouter();
@@ -35,7 +35,11 @@ export default function SearchScreen() {
     const colors = isDarkMode ? darkColors : lightColors;
 
     const handleBackPress = () => {
-        router.back(); // 뒤로 가기
+        setShowMap(false); // 1. 먼저 맵 제거
+        setTimeout(() => {
+            router.back();   // 2. 그 다음 pop
+        }, 10);
+        return true;
     };
 
     useEffect(() => {
@@ -190,23 +194,25 @@ export default function SearchScreen() {
             <View style={{ flex: 1 }}>
                 {/* 지도 */}
                 <View style={{ height: 280 }}>
-                    <NaverMap.NaverMapView
-                        style={{ flex: 1 }}
-                        region={region}
-                        showsUserLocation
-                        ref={mapRef}
-                    >
-                        {stores.map((store, index) => (
-                            store.mapx && store.mapy && (
-                                <NaverMap.NaverMapMarkerOverlay
-                                    key={index}
-                                    latitude= {parseFloat(store.mapy) / 1e7}
-                                    longitude= {parseFloat(store.mapx) / 1e7}
-                                    pinColor={selectedIndex === index ? colors.accent : 'gray'}
-                                />
-                            )
-                        ))}
-                    </NaverMap.NaverMapView>
+                    {showMap &&
+                        <NaverMap.NaverMapView
+                            style={{ flex: 1 }}
+                            region={region}
+                            showsUserLocation
+                            ref={mapRef}
+                        >
+                            {stores.map((store, index) => (
+                                store.mapx && store.mapy && (
+                                    <NaverMap.NaverMapMarkerOverlay
+                                        key={index}
+                                        latitude= {parseFloat(store.mapy) / 1e7}
+                                        longitude= {parseFloat(store.mapx) / 1e7}
+                                        pinColor={selectedIndex === index ? colors.accent : 'gray'}
+                                    />
+                                )
+                            ))}
+                        </NaverMap.NaverMapView>
+                    }
                 </View>
 
                 {/* FlatList 리스트 */}

@@ -35,6 +35,7 @@ function LayoutInner() {
             <Stack
                 screenOptions={{
                     headerShown: !hideHeaderLogo,
+                    headerLeft: () => null,
                     headerTitle: () =>
                         hideHeaderLogo ? null : (
                             <TouchableOpacity onPress={() => router.push('/home')}>
